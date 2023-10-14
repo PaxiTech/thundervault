@@ -1,0 +1,10 @@
+User
+- Login/logout
+- profile
+- History Buy
+- Buy
+
+Admin
+- Login/ logout
+- History sale all
+- export excel
