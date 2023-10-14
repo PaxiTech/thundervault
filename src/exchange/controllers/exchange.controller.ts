@@ -41,7 +41,7 @@ export class ExchangeController {
   @ApiOkResponse({ type: openSaleItemResponse })
   @ApiBadRequestResponse({ type: ErrorResponse })
   async getOpenSale() {
-    const result = await this.exchangeService.getCurrentPreSale();
+    const result = await this.exchangeService.getCurrentPreSaleInfo();
     return result;
   }
 

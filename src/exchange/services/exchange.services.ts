@@ -122,6 +122,24 @@ export class ExchangeService {
     return {};
   }
 
+  public async getCurrentPreSaleInfo(): Promise<any> {
+    const currentPreSale = this.getCurrentPreSale();
+    if (!currentPreSale) {
+      return currentPreSale;
+    }
+    const totalSaled = await this.exchangeRepository.getTotalHasBeenSale(currentPreSale.id);
+    const totalUser = await this.exchangeRepository.getTotalUsers(currentPreSale.id);
+    const totalTimesSaled = await this.exchangeRepository.count({
+      roundId: currentPreSale.id,
+    });
+    return {
+      ...currentPreSale,
+      totalAmountHadSale: totalSaled,
+      totalUser: totalUser,
+      totalTimesSale: totalTimesSaled,
+    };
+  }
+
   public isValidBuyTime(currentPreSale): boolean {
     const currentTime = this.helperService.getCurrentTime();
     const startSaleTime = moment(currentPreSale.startSaleTime).format('YYYY-MM-DD HH:mm:ss');

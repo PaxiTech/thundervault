@@ -8,8 +8,8 @@ export enum ExchangeStatus {
 }
 
 export enum ExchangeType {
-  PUBLIC_SALE = 'PUBLIC',
   PRIVATE_SALE = 'PRIVATE',
+  PUBLIC_SALE = 'PUBLIC',
 }
 
 export class ExchangeItem {
@@ -33,9 +33,6 @@ export class ExchangeItem {
 
   @ApiProperty()
   tokenSymbol?: string;
-
-  @ApiProperty()
-  tokenAddress?: string;
 
   @ApiProperty()
   price: number;
@@ -103,6 +100,21 @@ export class openSaleItem {
 
   @ApiProperty()
   maxAmount: number;
+
+  @ApiProperty()
+  totalAmountHadSale: number;
+
+  @ApiProperty()
+  totalUser: number;
+
+  @ApiProperty()
+  totalTimesSale: number;
+
+  @ApiProperty()
+  ticketPrice: number;
+
+  @ApiProperty()
+  maxTicket: number;
 }
 
 export class openSaleItemResponse {
