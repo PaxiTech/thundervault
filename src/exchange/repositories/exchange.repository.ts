@@ -31,4 +31,21 @@ export class ExchangeRepository extends AbstractRepository<ExchangeDocument> {
 
     return record.amount;
   }
+  async getTotalUsers(roundId: string): Promise<number> {
+    const data = await this.aggregate([
+      {
+        $match: {
+          roundId: roundId,
+        },
+      },
+      { $group: { _id: '$wallet' } },
+      { $group: { _id: null, count: { $sum: 1 } } },
+    ]).exec();
+    const record = _get(data, 0);
+    if (!record) {
+      return 0;
+    }
+
+    return record.count;
+  }
 }
