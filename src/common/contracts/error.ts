@@ -57,7 +57,7 @@ export const Errors = {
   },
   OVER_MAX_AMOUNT: {
     code: 'OVER_MAX_AMOUNT',
-    message: 'over max amount this campaign',
+    message: 'over max amount for this round',
     status: HttpStatus.BAD_REQUEST,
   },
 };
