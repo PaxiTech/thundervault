@@ -13,6 +13,7 @@ import { UtilHelperService } from '@src/utils/helper.service';
 import { get as _get, isEmpty as _isEmpty } from 'lodash';
 import * as moment from 'moment-timezone';
 import { Types } from 'mongoose';
+import { formatEther, ethers } from 'ethers';
 
 @Injectable()
 export class ExchangeService {
@@ -32,11 +33,11 @@ export class ExchangeService {
   public async buyPreSale(
     userId: string,
     wallet: string,
-    exchangeBuydto: ExchangeBuyDto,
+    exchangeBuyDto: ExchangeBuyDto,
   ): Promise<any> {
     const currentPreSale = this.getCurrentPreSale();
     //check current round presale
-    if (currentPreSale.id !== exchangeBuydto.roundId) {
+    if (currentPreSale.id !== exchangeBuyDto.roundId) {
       const { code, message, status } = Errors.INVALID_BUY_TIME;
       throw new AppException(code, message, status);
     }
@@ -48,20 +49,33 @@ export class ExchangeService {
     }
     //check total amount ticket
     const totalSaled = await this.getTotalHasBeenSale(currentPreSale.roundId);
-    if (totalSaled + exchangeBuydto.amountTicket > currentPreSale.maxTicket) {
+    if (totalSaled + exchangeBuyDto.amountTicket > currentPreSale.maxTicket) {
       const { code, message, status } = Errors.OVER_MAX_AMOUNT;
+      throw new AppException(code, message, status);
+    }
+    const ownerWallet = this.configService.get<string>('ownerWallet');
+    if (_isEmpty(ownerWallet)) {
+      const { code, message, status } = Errors.OWNER_WALLET_NOT_FOUND;
+      throw new AppException(code, message, status);
+    }
+    const isValidTransaction = await this.validateTransaction(wallet, ownerWallet, exchangeBuyDto);
+    if (!isValidTransaction) {
+      const { code, message, status } = Errors.INVALID_VALIDATE_TRANSACTION;
       throw new AppException(code, message, status);
     }
 
     const createData = {
-      ...exchangeBuydto,
+      ...exchangeBuyDto,
       wallet: wallet,
+      transactionValue: exchangeBuyDto.transactionValue,
+      transactionHash: exchangeBuyDto.transactionHash,
+      ownerWallet: ownerWallet,
       price: currentPreSale.price,
       ticketPrice: currentPreSale.ticketPrice,
       amountForOneTicket: currentPreSale.amountForOneTicket,
       exchangeType: currentPreSale.exchangeType,
-      amountToken: exchangeBuydto.amountTicket * currentPreSale.amountForOneTicket,
-      total: currentPreSale.ticketPrice * exchangeBuydto.amountTicket,
+      amountToken: exchangeBuyDto.amountTicket * currentPreSale.amountForOneTicket,
+      total: currentPreSale.ticketPrice * exchangeBuyDto.amountTicket,
       createTime: moment().format('YYYY-MM-DD HH:mm:ss'),
       ownerId: new Types.ObjectId(userId),
     };
@@ -155,6 +169,31 @@ export class ExchangeService {
     }
     return false;
   }
+
+  public async validateTransaction(
+    wallet: string,
+    ownerWallet: string,
+    exchangeBuyDto: ExchangeBuyDto,
+  ): Promise<boolean> {
+    const transactionHash = exchangeBuyDto.transactionHash;
+    const transactionValue = exchangeBuyDto.transactionValue;
+    try {
+      const provider = ethers.getDefaultProvider('https://bsc-dataseed.binance.org/');
+      const transaction = await provider.getTransaction(transactionHash);
+      const valueUsdt = Math.ceil(parseFloat(formatEther(transaction.value)));
+      if (
+        transaction.from === wallet &&
+        transaction.to === ownerWallet &&
+        valueUsdt >= transactionValue
+      ) {
+        return true;
+      }
+    } catch (e) {
+      const { code, message, status } = Errors.INVALID_VALIDATE_TRANSACTION;
+      throw new AppException(code, message, status);
+    }
+    return false;
+  }
   /**
    * populateExchangeInfo
    * @param exchange {ExchangeDocument}
@@ -176,6 +215,9 @@ export class ExchangeService {
       discountPercent: exchange?.discountPercent,
       discountPrice: exchange?.discountPrice,
       discountTotal: exchange?.discountTotal,
+      transactionValue: exchange?.transactionValue,
+      transactionHash: exchange?.transactionHash,
+      ownerWallet: exchange?.ownerWallet,
       createTime: exchange?.createTime,
       wallet: exchange.wallet,
       ownerId: _get(exchange, 'ownerId'),

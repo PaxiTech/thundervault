@@ -69,6 +69,18 @@ export class Exchange {
 
   @ApiProperty()
   @Prop()
+  transactionValue: number;
+
+  @ApiProperty()
+  @Prop()
+  transactionHash: string;
+
+  @ApiProperty()
+  @Prop()
+  ownerWallet: string;
+
+  @ApiProperty()
+  @Prop()
   createTime: string;
 
   @ApiProperty()

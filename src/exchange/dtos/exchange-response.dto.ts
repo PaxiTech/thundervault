@@ -59,6 +59,15 @@ export class ExchangeItem {
   discountTotal?: number;
 
   @ApiProperty()
+  transactionValue?: number;
+
+  @ApiProperty()
+  transactionHash?: string;
+
+  @ApiProperty()
+  ownerWallet?: string;
+
+  @ApiProperty()
   createTime: string;
 
   @ApiProperty()

@@ -14,6 +14,10 @@ export interface IExchange {
   discountPrice: number;
   discountTotal: number;
   createTime: number;
+  transactionValue: number;
+  transactionHash: string;
+  ownerWallet: string;
+
   wallet: string;
   createdAt: string;
   updatedAt: string;
