@@ -72,7 +72,7 @@ export class Exchange {
   transactionValue: number;
 
   @ApiProperty()
-  @Prop()
+  @Prop({ unique: true })
   transactionHash: string;
 
   @ApiProperty()
