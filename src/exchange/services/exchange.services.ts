@@ -46,9 +46,9 @@ export class ExchangeService {
       const { code, message, status } = Errors.INVALID_BUY_TIME;
       throw new AppException(code, message, status);
     }
-    //check total amount
+    //check total amount ticket
     const totalSaled = await this.getTotalHasBeenSale(currentPreSale.roundId);
-    if (totalSaled + exchangeBuydto.amount > currentPreSale.maxAmount) {
+    if (totalSaled + exchangeBuydto.amountTicket > currentPreSale.maxTicket) {
       const { code, message, status } = Errors.OVER_MAX_AMOUNT;
       throw new AppException(code, message, status);
     }
@@ -57,8 +57,11 @@ export class ExchangeService {
       ...exchangeBuydto,
       wallet: wallet,
       price: currentPreSale.price,
+      ticketPrice: currentPreSale.ticketPrice,
+      amountForOneTicket: currentPreSale.amountForOneTicket,
       exchangeType: currentPreSale.exchangeType,
-      total: currentPreSale.price * exchangeBuydto.amount,
+      amountToken: exchangeBuydto.amountTicket * currentPreSale.amountForOneTicket,
+      total: currentPreSale.ticketPrice * exchangeBuydto.amountTicket,
       createTime: moment().format('YYYY-MM-DD HH:mm:ss'),
       ownerId: new Types.ObjectId(userId),
     };
@@ -134,9 +137,12 @@ export class ExchangeService {
     });
     return {
       ...currentPreSale,
-      totalAmountHadSale: totalSaled,
-      totalUser: totalUser,
-      totalTimesSale: totalTimesSaled,
+      saledInfo: {
+        totalTicket: totalSaled,
+        totalToken: totalSaled * currentPreSale.amountForOneTicket,
+        totalUser: totalUser,
+        totalTimesSale: totalTimesSaled,
+      },
     };
   }
 
@@ -163,7 +169,9 @@ export class ExchangeService {
       tokenName: exchange?.tokenName,
       tokenSymbol: exchange?.tokenSymbol,
       price: exchange?.price,
-      amount: exchange?.amount,
+      amountToken: exchange?.amountToken,
+      amountTicket: exchange?.amountTicket,
+      amountForOneTicket: exchange?.amountForOneTicket,
       total: exchange?.total,
       discountPercent: exchange?.discountPercent,
       discountPrice: exchange?.discountPrice,

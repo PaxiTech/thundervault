@@ -6,7 +6,9 @@ export interface IExchange {
   tokenName: string;
   tokenSymbol: string;
   price: number;
-  amount: number;
+  amountTicket: number;
+  amountToken: number;
+  amountForOneTicket: number;
   total: number;
   discountPercent: number;
   discountPrice: number;

@@ -38,7 +38,13 @@ export class ExchangeItem {
   price: number;
 
   @ApiProperty()
-  amount: number;
+  amountTicket: number;
+
+  @ApiProperty()
+  amountToken: number;
+
+  @ApiProperty()
+  amountForOneTicket: number;
 
   @ApiProperty()
   total: number;
@@ -99,10 +105,10 @@ export class openSaleItem {
   price: number;
 
   @ApiProperty()
-  maxAmount: number;
+  maxToken: number;
 
   @ApiProperty()
-  totalAmountHadSale: number;
+  totalTicketHadSale: number;
 
   @ApiProperty()
   totalUser: number;
@@ -112,6 +118,9 @@ export class openSaleItem {
 
   @ApiProperty()
   ticketPrice: number;
+
+  @ApiProperty()
+  amountForOneTicket: number;
 
   @ApiProperty()
   maxTicket: number;

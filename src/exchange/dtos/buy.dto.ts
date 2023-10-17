@@ -5,7 +5,7 @@ export class ExchangeBuyDto {
   @IsNotEmpty()
   @IsNumber()
   @Min(1)
-  amount: number;
+  amountTicket: number;
 
   @ApiProperty()
   @IsNotEmpty()
