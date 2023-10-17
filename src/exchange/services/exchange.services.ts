@@ -13,6 +13,7 @@ import { UtilHelperService } from '@src/utils/helper.service';
 import { get as _get, isEmpty as _isEmpty } from 'lodash';
 import * as moment from 'moment-timezone';
 import { Types } from 'mongoose';
+import { ethers } from 'ethers';
 
 @Injectable()
 export class ExchangeService {
