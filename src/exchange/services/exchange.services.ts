@@ -5,7 +5,11 @@ import { PaginateDto } from '@src/common/dtos/paginate.dto';
 import { AppException } from '@src/common/exceptions/app.exception';
 import { presaleConfig } from '@src/exchange/contracts/exchange-config';
 import { ExchangeBuyDto } from '@src/exchange/dtos/buy.dto';
-import { ExchangeItem, ExchangeListItem } from '@src/exchange/dtos/exchange-response.dto';
+import {
+  ExchangeItem,
+  ExchangeListItem,
+  CommonConfigItem,
+} from '@src/exchange/dtos/exchange-response.dto';
 import { FilterExchangeListDto } from '@src/exchange/dtos/list.dto';
 import { ExchangeRepository } from '@src/exchange/repositories/exchange.repository';
 import { ExchangeDocument } from '@src/exchange/schemas/exchange.schema';
@@ -176,6 +180,13 @@ export class ExchangeService {
     exchangeBuyDto: ExchangeBuyDto,
   ): Promise<boolean> {
     const transactionHash = exchangeBuyDto.transactionHash;
+    const checkExist = await this.exchangeRepository.findOne({
+      conditions: { transactionHash: transactionHash, wallet: wallet },
+    });
+    if (!_isEmpty(checkExist)) {
+      const { code, message, status } = Errors.INVALID_TRANSACTION_USED;
+      throw new AppException(code, message, status);
+    }
     const transactionValue = exchangeBuyDto.transactionValue;
     try {
       const provider = ethers.getDefaultProvider('https://bsc-dataseed.binance.org/');
@@ -223,6 +234,18 @@ export class ExchangeService {
       ownerId: _get(exchange, 'ownerId'),
       createdAt: _get(exchange, 'createdAt'),
       updatedAt: _get(exchange, 'updatedAt'),
+    };
+    return data;
+  }
+
+  public async getCommonConfig(): Promise<CommonConfigItem> {
+    const ownerWallet = this.configService.get<string>('ownerWallet');
+    if (_isEmpty(ownerWallet)) {
+      const { code, message, status } = Errors.OWNER_WALLET_NOT_FOUND;
+      throw new AppException(code, message, status);
+    }
+    const data: CommonConfigItem = {
+      ownerWallet: ownerWallet,
     };
     return data;
   }
