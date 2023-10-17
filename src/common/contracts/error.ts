@@ -70,4 +70,9 @@ export const Errors = {
     message: 'Invalid validate transaction',
     status: HttpStatus.BAD_REQUEST,
   },
+  INVALID_TRANSACTION_USED: {
+    code: 'INVALID_TRANSACTION_USED',
+    message: 'Invalid validate transaction. Transaction has been used.',
+    status: HttpStatus.BAD_REQUEST,
+  },
 };

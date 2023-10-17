@@ -176,6 +176,13 @@ export class ExchangeService {
     exchangeBuyDto: ExchangeBuyDto,
   ): Promise<boolean> {
     const transactionHash = exchangeBuyDto.transactionHash;
+    const checkExist = await this.exchangeRepository.findOne({
+      conditions: { transactionHash: transactionHash, wallet: wallet },
+    });
+    if (!_isEmpty(checkExist)) {
+      const { code, message, status } = Errors.INVALID_TRANSACTION_USED;
+      throw new AppException(code, message, status);
+    }
     const transactionValue = exchangeBuyDto.transactionValue;
     try {
       const provider = ethers.getDefaultProvider('https://bsc-dataseed.binance.org/');
