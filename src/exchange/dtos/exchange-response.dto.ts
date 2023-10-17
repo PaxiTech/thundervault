@@ -97,7 +97,7 @@ export class ExchangeListResponse {
   data: ExchangeListItem;
 }
 
-export class openSaleItem {
+export class OpenSaleItem {
   @ApiProperty()
   id: string;
 
@@ -135,9 +135,20 @@ export class openSaleItem {
   maxTicket: number;
 }
 
-export class openSaleItemResponse {
+export class OpenSaleItemResponse {
   @ApiProperty()
   status: number;
-  @ApiProperty({ type: openSaleItem })
-  data: openSaleItem;
+  @ApiProperty({ type: OpenSaleItem })
+  data: OpenSaleItem;
+}
+
+export class CommonConfigItem {
+  @ApiProperty()
+  ownerWallet: string;
+}
+export class CommonConfigItemResponse {
+  @ApiProperty()
+  status: number;
+  @ApiProperty({ type: CommonConfigItem })
+  data: CommonConfigItem;
 }

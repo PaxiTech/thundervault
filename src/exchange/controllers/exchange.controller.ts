@@ -17,7 +17,8 @@ import { AuthenticationGuard } from '@src/user/guards/jwt.guard';
 import { ErrorResponse } from '@src/common/contracts/openapi';
 import {
   ExchangeItemResponse,
-  openSaleItemResponse,
+  OpenSaleItemResponse,
+  CommonConfigItemResponse,
 } from '@src/exchange/dtos/exchange-response.dto';
 
 @ApiTags('Exchange')
@@ -38,7 +39,7 @@ export class ExchangeController {
   }
 
   @Get('open-sale')
-  @ApiOkResponse({ type: openSaleItemResponse })
+  @ApiOkResponse({ type: OpenSaleItemResponse })
   @ApiBadRequestResponse({ type: ErrorResponse })
   async getOpenSale() {
     const result = await this.exchangeService.getCurrentPreSaleInfo();
@@ -64,6 +65,16 @@ export class ExchangeController {
       filterExchangeListDto,
       paginationParam,
     );
+    return result;
+  }
+
+  @Get('common-config')
+  @UseGuards(AuthenticationGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: CommonConfigItemResponse })
+  @ApiBadRequestResponse({ type: ErrorResponse })
+  async getCommonConfig() {
+    const result = await this.exchangeService.getCommonConfig();
     return result;
   }
 }
