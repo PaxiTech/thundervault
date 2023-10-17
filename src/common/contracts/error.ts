@@ -60,4 +60,14 @@ export const Errors = {
     message: 'over max amount for this round',
     status: HttpStatus.BAD_REQUEST,
   },
+  OWNER_WALLET_NOT_FOUND: {
+    code: 'OWNER_WALLET_NOT_FOUND',
+    message: 'Please set owner wallet',
+    status: HttpStatus.BAD_REQUEST,
+  },
+  INVALID_VALIDATE_TRANSACTION: {
+    code: 'INVALID_VALIDATE_TRANSACTION',
+    message: 'Invalid validate transaction',
+    status: HttpStatus.BAD_REQUEST,
+  },
 };
