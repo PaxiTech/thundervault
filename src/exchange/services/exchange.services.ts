@@ -62,11 +62,18 @@ export class ExchangeService {
       const { code, message, status } = Errors.OWNER_WALLET_NOT_FOUND;
       throw new AppException(code, message, status);
     }
-    const isValidTransaction = await this.validateTransaction(wallet, ownerWallet, exchangeBuyDto);
-    if (!isValidTransaction) {
-      const { code, message, status } = Errors.INVALID_VALIDATE_TRANSACTION;
-      throw new AppException(code, message, status);
-    }
+    // tạm thời không validate transaction
+    // const ticketPrice = currentPreSale.ticketPrice;
+    // const isValidTransaction = await this.validateTransaction(
+    //   wallet,
+    //   ownerWallet,
+    //   exchangeBuyDto,
+    //   ticketPrice,
+    // );
+    // if (!isValidTransaction) {
+    //   const { code, message, status } = Errors.INVALID_VALIDATE_TRANSACTION;
+    //   throw new AppException(code, message, status);
+    // }
 
     const createData = {
       ...exchangeBuyDto,
@@ -181,6 +188,7 @@ export class ExchangeService {
     wallet: string,
     ownerWallet: string,
     exchangeBuyDto: ExchangeBuyDto,
+    ticketPrice: number,
   ): Promise<boolean> {
     const transactionHash = exchangeBuyDto.transactionHash;
     const checkExist = await this.exchangeRepository.findOne({
@@ -194,11 +202,11 @@ export class ExchangeService {
     try {
       const provider = ethers.getDefaultProvider('https://bsc-dataseed.binance.org/');
       const transaction = await provider.getTransaction(transactionHash);
-      const valueUsdt = Math.ceil(parseFloat(formatEther(transaction.value)));
+      // const valueUsdt = Math.ceil(parseFloat(formatEther(transaction.value)));
       if (
         transaction.from === wallet &&
         transaction.to === ownerWallet &&
-        valueUsdt >= transactionValue
+        transactionValue >= ticketPrice
       ) {
         return true;
       }
