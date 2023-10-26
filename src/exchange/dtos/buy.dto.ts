@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, Min, IsString, Length } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 export class ExchangeBuyDto {
   @ApiProperty()
   @IsNotEmpty()
@@ -23,7 +23,7 @@ export class ExchangeBuyDto {
   transactionHash: string;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
   @Min(0)
   transactionValue: number;
