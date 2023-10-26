@@ -20,7 +20,7 @@ export class ExchangeRepository extends AbstractRepository<ExchangeDocument> {
       {
         $group: {
           _id: null,
-          amount: { $sum: '$amount' },
+          amountTicket: { $sum: '$amountTicket' },
         },
       },
     ]).exec();
@@ -29,6 +29,23 @@ export class ExchangeRepository extends AbstractRepository<ExchangeDocument> {
       return 0;
     }
 
-    return record.amount;
+    return record.amountTicket;
+  }
+  async getTotalUsers(roundId: string): Promise<number> {
+    const data = await this.aggregate([
+      {
+        $match: {
+          roundId: roundId,
+        },
+      },
+      { $group: { _id: '$wallet' } },
+      { $group: { _id: null, count: { $sum: 1 } } },
+    ]).exec();
+    const record = _get(data, 0);
+    if (!record) {
+      return 0;
+    }
+
+    return record.count;
   }
 }

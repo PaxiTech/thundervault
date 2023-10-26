@@ -8,8 +8,8 @@ export enum ExchangeStatus {
 }
 
 export enum ExchangeType {
-  PUBLIC_SALE = 'PUBLIC',
   PRIVATE_SALE = 'PRIVATE',
+  PUBLIC_SALE = 'PUBLIC',
 }
 
 export class ExchangeItem {
@@ -35,13 +35,16 @@ export class ExchangeItem {
   tokenSymbol?: string;
 
   @ApiProperty()
-  tokenAddress?: string;
-
-  @ApiProperty()
   price: number;
 
   @ApiProperty()
-  amount: number;
+  amountTicket: number;
+
+  @ApiProperty()
+  amountToken: number;
+
+  @ApiProperty()
+  amountForOneTicket: number;
 
   @ApiProperty()
   total: number;
@@ -54,6 +57,15 @@ export class ExchangeItem {
 
   @ApiProperty()
   discountTotal?: number;
+
+  @ApiProperty()
+  transactionValue?: number;
+
+  @ApiProperty()
+  transactionHash?: string;
+
+  @ApiProperty()
+  ownerWallet?: string;
 
   @ApiProperty()
   createTime: string;
@@ -85,7 +97,7 @@ export class ExchangeListResponse {
   data: ExchangeListItem;
 }
 
-export class openSaleItem {
+export class OpenSaleItem {
   @ApiProperty()
   id: string;
 
@@ -102,12 +114,41 @@ export class openSaleItem {
   price: number;
 
   @ApiProperty()
-  maxAmount: number;
+  maxToken: number;
+
+  @ApiProperty()
+  totalTicketHadSale: number;
+
+  @ApiProperty()
+  totalUser: number;
+
+  @ApiProperty()
+  totalTimesSale: number;
+
+  @ApiProperty()
+  ticketPrice: number;
+
+  @ApiProperty()
+  amountForOneTicket: number;
+
+  @ApiProperty()
+  maxTicket: number;
 }
 
-export class openSaleItemResponse {
+export class OpenSaleItemResponse {
   @ApiProperty()
   status: number;
-  @ApiProperty({ type: openSaleItem })
-  data: openSaleItem;
+  @ApiProperty({ type: OpenSaleItem })
+  data: OpenSaleItem;
+}
+
+export class CommonConfigItem {
+  @ApiProperty()
+  ownerWallet: string;
+}
+export class CommonConfigItemResponse {
+  @ApiProperty()
+  status: number;
+  @ApiProperty({ type: CommonConfigItem })
+  data: CommonConfigItem;
 }

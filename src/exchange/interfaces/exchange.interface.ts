@@ -6,12 +6,18 @@ export interface IExchange {
   tokenName: string;
   tokenSymbol: string;
   price: number;
-  amount: number;
+  amountTicket: number;
+  amountToken: number;
+  amountForOneTicket: number;
   total: number;
   discountPercent: number;
   discountPrice: number;
   discountTotal: number;
   createTime: number;
+  transactionValue: number;
+  transactionHash: string;
+  ownerWallet: string;
+
   wallet: string;
   createdAt: string;
   updatedAt: string;

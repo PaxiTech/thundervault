@@ -8,4 +8,5 @@ export default () => ({
   debug: process.env.IS_DEBUG || false,
   presaleId: process.env.PRESALE_ID || 1,
   currentTime: process.env.CURRENT_TIME || '',
+  ownerWallet: process.env.OWNER_WALLET || '',
 });

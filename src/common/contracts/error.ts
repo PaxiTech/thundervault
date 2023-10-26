@@ -57,7 +57,22 @@ export const Errors = {
   },
   OVER_MAX_AMOUNT: {
     code: 'OVER_MAX_AMOUNT',
-    message: 'over max amount this campaign',
+    message: 'over max amount for this round',
+    status: HttpStatus.BAD_REQUEST,
+  },
+  OWNER_WALLET_NOT_FOUND: {
+    code: 'OWNER_WALLET_NOT_FOUND',
+    message: 'Please set owner wallet',
+    status: HttpStatus.BAD_REQUEST,
+  },
+  INVALID_VALIDATE_TRANSACTION: {
+    code: 'INVALID_VALIDATE_TRANSACTION',
+    message: 'Invalid validate transaction',
+    status: HttpStatus.BAD_REQUEST,
+  },
+  INVALID_TRANSACTION_USED: {
+    code: 'INVALID_TRANSACTION_USED',
+    message: 'Invalid validate transaction. Transaction has been used.',
     status: HttpStatus.BAD_REQUEST,
   },
 };

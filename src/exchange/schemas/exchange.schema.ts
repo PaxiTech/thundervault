@@ -41,7 +41,15 @@ export class Exchange {
 
   @ApiProperty()
   @Prop({ type: Number, min: 0 })
-  amount: number;
+  amountTicket: number;
+
+  @ApiProperty()
+  @Prop({ type: Number, min: 0 })
+  amountForOneTicket: number;
+
+  @ApiProperty()
+  @Prop({ type: Number, min: 0 })
+  amountToken: number;
 
   @ApiProperty()
   @Prop()
@@ -58,6 +66,18 @@ export class Exchange {
   @ApiProperty()
   @Prop()
   discountTotal: number;
+
+  @ApiProperty()
+  @Prop()
+  transactionValue: number;
+
+  @ApiProperty()
+  @Prop({ unique: true })
+  transactionHash: string;
+
+  @ApiProperty()
+  @Prop()
+  ownerWallet: string;
 
   @ApiProperty()
   @Prop()
