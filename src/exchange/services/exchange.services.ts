@@ -155,6 +155,9 @@ export class ExchangeService {
     });
     return {
       ...currentPreSale,
+      isEnd:
+        currentPreSale.endTime < this.helperService.getCurrentTime() ||
+        totalSaled >= currentPreSale.maxTicket,
       saledInfo: {
         totalTicket: totalSaled,
         totalToken: totalSaled * currentPreSale.amountForOneTicket,
