@@ -1,11 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-
-export enum ExchangeStatus {
-  NEW = 'NEW',
-  PROCESS = 'PROCESS',
-  FINISH = 'FINISH',
-  CANCEL = 'CANCEL',
-}
+import { ApiProperty } from '@nestjs/swagger';
 
 export enum ExchangeType {
   PRIVATE_SALE = 'PRIVATE',
@@ -17,49 +10,7 @@ export class ExchangeItem {
   _id: string;
 
   @ApiProperty()
-  ownerId: string;
-
-  @ApiProperty({ enum: ExchangeType })
-  exchangeType: ExchangeType;
-
-  @ApiProperty({ enum: ExchangeStatus })
-  status: ExchangeStatus;
-
-  @ApiProperty()
-  tokenName?: string;
-
-  @ApiProperty()
-  token?: string;
-
-  @ApiProperty()
-  tokenSymbol?: string;
-
-  @ApiProperty()
-  price: number;
-
-  @ApiProperty()
-  amountTicket: number;
-
-  @ApiProperty()
-  amountToken: number;
-
-  @ApiProperty()
-  amountForOneTicket: number;
-
-  @ApiProperty()
-  total: number;
-
-  @ApiProperty()
-  discountPercent?: number;
-
-  @ApiProperty()
-  discountPrice?: number;
-
-  @ApiProperty()
-  discountTotal?: number;
-
-  @ApiProperty()
-  transactionValue?: number;
+  wallet: string;
 
   @ApiProperty()
   transactionHash?: string;
@@ -68,10 +19,31 @@ export class ExchangeItem {
   ownerWallet?: string;
 
   @ApiProperty()
-  createTime: string;
+  amount: number;
 
   @ApiProperty()
-  wallet: string;
+  price: number;
+
+  @ApiProperty()
+  roundId?: string;
+
+  @ApiProperty()
+  ticketPrice: number;
+
+  @ApiProperty()
+  amountForOneTicket: number;
+
+  @ApiProperty({ enum: ExchangeType })
+  exchangeType: ExchangeType;
+
+  @ApiProperty()
+  amountToken: number;
+
+  @ApiProperty()
+  amountTicket: number;
+
+  @ApiProperty()
+  createTime: string;
 
   @ApiProperty({ type: Date })
   createdAt?: Date;

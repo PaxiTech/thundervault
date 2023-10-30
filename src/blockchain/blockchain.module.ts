@@ -6,4 +6,4 @@ import { ExchangeModule } from '@src/exchange/exchange.module';
   providers: [BlockchainService],
   imports: [ExchangeModule],
 })
-export class BlockchainModule { }
+export class BlockchainModule {}
