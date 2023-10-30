@@ -18,7 +18,7 @@ export class UserService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private userRepository: UserRepository,
-  ) {}
+  ) { }
 
   public async loginUser(loginDto: LoginDto): Promise<TokenResponse> {
     const { accountAddress, signature } = loginDto;
@@ -124,5 +124,13 @@ export class UserService {
       updatedAt: (user as any).updatedAt,
     };
     return data;
+  }
+
+  public async createUser(wallet: string) {
+    let entity = await this.userRepository.findOne({
+      conditions: { wallet },
+    });
+    if (!entity) entity = await this.userRepository.create({ wallet });
+    return entity;
   }
 }
