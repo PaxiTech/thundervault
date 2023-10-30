@@ -1,24 +1,14 @@
 export interface IExchange {
-  _id: string;
-  token: string;
-  exchangeType: string;
-  status: string;
-  tokenName: string;
-  tokenSymbol: string;
-  price: number;
-  amountTicket: number;
-  amountToken: number;
-  amountForOneTicket: number;
-  total: number;
-  discountPercent: number;
-  discountPrice: number;
-  discountTotal: number;
-  createTime: number;
-  transactionValue: number;
+  wallet: string;
   transactionHash: string;
   ownerWallet: string;
-
-  wallet: string;
-  createdAt: string;
-  updatedAt: string;
+  amount: number;
+  price: number;
+  roundId: string;
+  ticketPrice: number;
+  amountForOneTicket: number;
+  exchangeType: string;
+  amountToken: number;
+  amountTicket: number;
+  createTime: string;
 }
