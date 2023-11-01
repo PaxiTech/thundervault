@@ -65,4 +65,16 @@ export class ExchangeController {
     const result = this.exchangeService.addManual(exchangeAddManualDto);
     return result;
   }
+
+  @Post('result')
+  @ApiOkResponse({ type: ExchangeListResponse })
+  @ApiBadRequestResponse({ type: ErrorResponse })
+  @ApiQuery({ type: PaginateDto })
+  async getResult(
+    @pagination() paginationParam: PaginateDto,
+    @Body() filterExchangeListDto: FilterExchangeListDto,
+  ) {
+    const result = await this.exchangeService.getResult(filterExchangeListDto, paginationParam);
+    return result;
+  }
 }
