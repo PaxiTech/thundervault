@@ -91,6 +91,7 @@ export class ExchangeService {
       isEnd:
         currentPreSale.endTime < this.helperService.getCurrentTime() ||
         totalSaled >= currentPreSale.maxTicket,
+      serverTime: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
       saledInfo: {
         totalTicket: totalSaled,
         totalToken: totalSaled * currentPreSale.amountForOneTicket,
