@@ -19,7 +19,7 @@ export class ExchangeService {
     private exchangeRepository: ExchangeRepository,
     private configService: ConfigService,
     private helperService: UtilHelperService,
-  ) {}
+  ) { }
 
   public async getTotalHasBeenSale(roundId: string): Promise<number> {
     const total = await this.exchangeRepository.getTotalHasBeenSale(roundId);
@@ -88,6 +88,7 @@ export class ExchangeService {
       isEnd:
         currentPreSale.endTime < this.helperService.getCurrentTime() ||
         totalSaled >= currentPreSale.maxTicket,
+      serverTime: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
       saledInfo: {
         totalTicket: totalSaled,
         totalToken: totalSaled * currentPreSale.amountForOneTicket,
