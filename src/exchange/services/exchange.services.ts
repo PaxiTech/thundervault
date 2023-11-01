@@ -11,7 +11,9 @@ import { ExchangeDocument } from '@src/exchange/schemas/exchange.schema';
 import { UtilHelperService } from '@src/utils/helper.service';
 import { get as _get, isEmpty as _isEmpty } from 'lodash';
 import * as moment from 'moment-timezone';
-import { Types } from 'mongoose';
+import { IExchange } from '../interfaces/exchange.interface';
+import { ExchangeAddManualDto } from '@src/exchange/dtos/buy.dto';
+import { UserService } from '@src/user/services/user.services';
 
 @Injectable()
 export class ExchangeService {
@@ -19,6 +21,7 @@ export class ExchangeService {
     private exchangeRepository: ExchangeRepository,
     private configService: ConfigService,
     private helperService: UtilHelperService,
+    private userService: UserService,
   ) {}
 
   public async getTotalHasBeenSale(roundId: string): Promise<number> {
@@ -139,5 +142,35 @@ export class ExchangeService {
     const exchangeEntity = await this.exchangeRepository.create(createData);
     const exchangeInfo = this.populateExchangeInfo(exchangeEntity);
     return exchangeInfo;
+  }
+
+  public async addManual(exchangeAddManualDto: ExchangeAddManualDto) {
+    const { from, to, amount, transactionHash, secretKey } = exchangeAddManualDto;
+    const configSecretKey = this.configService.get<string>('configSecretKey');
+    if (secretKey != configSecretKey) {
+      const { code, message, status } = Errors.INVALID_SECRET_KEY;
+      throw new AppException(code, message, status);
+    }
+
+    //update or insert user
+    this.userService.upsertUser(from);
+    //get current presave
+    const currentPreSale = this.getCurrentPreSale();
+    //create exchange
+    const createData: IExchange = {
+      wallet: from,
+      transactionHash: transactionHash,
+      ownerWallet: to,
+      amount: amount,
+      roundId: currentPreSale?.id,
+      price: currentPreSale?.price,
+      ticketPrice: currentPreSale?.ticketPrice,
+      amountForOneTicket: currentPreSale?.amountForOneTicket,
+      exchangeType: currentPreSale?.exchangeType,
+      amountToken: currentPreSale?.amountForOneTicket,
+      amountTicket: 1,
+      createTime: moment().format('YYYY-MM-DD HH:mm:ss'),
+    };
+    return this.createExchange(createData);
   }
 }
