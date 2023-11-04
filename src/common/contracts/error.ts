@@ -75,4 +75,9 @@ export const Errors = {
     message: 'Invalid validate transaction. Transaction has been used.',
     status: HttpStatus.BAD_REQUEST,
   },
+  INVALID_SECRET_KEY: {
+    code: 'INVALID_SECRET_KEY',
+    message: 'secret key is invalid',
+    status: HttpStatus.BAD_REQUEST,
+  },
 };

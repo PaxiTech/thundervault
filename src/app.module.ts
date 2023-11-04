@@ -8,6 +8,7 @@ import { HealthModule } from '@src/health/health.module';
 import { CommonModule } from './common/common.module';
 import { UserModule } from './user/user.module';
 import { ExchangeModule } from './exchange/exchange.module';
+import { BlockchainModule } from './blockchain/blockchain.module';
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { ExchangeModule } from './exchange/exchange.module';
       },
     ]),
     ExchangeModule,
+    BlockchainModule
   ],
   controllers: [],
 })
-export class AppModule {}
+export class AppModule { }

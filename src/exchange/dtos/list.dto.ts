@@ -1,10 +1,7 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { CommonDto } from '@src/common/dtos/common.dto';
 import { IsOptional } from 'class-validator';
-export class FilterExchangeListDto {
-  // @ApiProperty({ type: String })
-  // @ApiPropertyOptional()
-  // @IsOptional()
-  // keyword: string;
+export class FilterExchangeListDto extends CommonDto {
   @ApiPropertyOptional()
   @IsOptional()
   roundId: string;
