@@ -16,7 +16,7 @@ import {
   ExchangeListResponse,
   OpenSaleItemResponse,
 } from '@src/exchange/dtos/exchange-response.dto';
-import { FilterExchangeListDto } from '@src/exchange/dtos/list.dto';
+import { FilterExchangeListDto, ExchangeResultDto } from '@src/exchange/dtos/list.dto';
 import { ExchangeService } from '@src/exchange/services/exchange.services';
 
 @ApiTags('Exchange')
@@ -72,9 +72,9 @@ export class ExchangeController {
   @ApiQuery({ type: PaginateDto })
   async getResult(
     @pagination() paginationParam: PaginateDto,
-    @Body() filterExchangeListDto: FilterExchangeListDto,
+    @Body() exchangeResultDto: ExchangeResultDto,
   ) {
-    const result = await this.exchangeService.getResult(filterExchangeListDto, paginationParam);
+    const result = await this.exchangeService.getResult(exchangeResultDto, paginationParam);
     return result;
   }
 }
