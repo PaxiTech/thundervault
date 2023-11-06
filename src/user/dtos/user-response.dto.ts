@@ -7,6 +7,12 @@ export class UserItem {
   @ApiProperty()
   wallet: string;
 
+  @ApiProperty()
+  level: number;
+
+  @ApiProperty()
+  referralCode: number;
+
   @ApiProperty({ type: Date })
   createdAt?: Date;
 

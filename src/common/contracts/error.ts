@@ -80,4 +80,9 @@ export const Errors = {
     message: 'secret key is invalid',
     status: HttpStatus.BAD_REQUEST,
   },
+  NFT_NOT_EXIST: {
+    code: 'NFT_NOT_EXIST',
+    message: 'The nft does not exist.',
+    status: HttpStatus.NOT_FOUND,
+  },
 };

@@ -9,6 +9,10 @@ import { CommonModule } from './common/common.module';
 import { UserModule } from './user/user.module';
 import { ExchangeModule } from './exchange/exchange.module';
 import { BlockchainModule } from './blockchain/blockchain.module';
+import { PoolModule } from './pool/pool.module';
+import { NftModule } from './nft/nft.module';
+import { OperatorModule } from './operator/operator.module';
+import { CommandModule } from 'nestjs-command';
 
 @Module({
   imports: [
@@ -32,8 +36,12 @@ import { BlockchainModule } from './blockchain/blockchain.module';
       },
     ]),
     ExchangeModule,
-    BlockchainModule
+    BlockchainModule,
+    PoolModule,
+    NftModule,
+    CommandModule,
+    OperatorModule,
   ],
   controllers: [],
 })
-export class AppModule { }
+export class AppModule {}

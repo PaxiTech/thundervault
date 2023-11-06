@@ -6,10 +6,15 @@ import { AppExceptionFilter } from '@src/common/exceptions/app-exception.filter'
 import { TransformInterceptor } from '@src/common/interceptors/transform.interceptor';
 import { AppLogger } from '@src/common/services/app-logger.service';
 import { ValidationPipe } from '@nestjs/common';
+import { join } from 'path';
 // import * as mongoose from 'mongoose';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true,
+  });
+  app.useStaticAssets(join(__dirname, '..', 'asset'), {
+    index: false,
+    prefix: '/asset',
   });
   // mongoose.set('debug', true);
   const logger = app.get(AppLogger);
