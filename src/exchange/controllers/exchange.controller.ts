@@ -1,10 +1,18 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Post, Request } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ErrorResponse } from '@src/common/contracts/openapi';
 import { pagination } from '@src/common/decorators/pagination';
 import { PaginateDto } from '@src/common/dtos/paginate.dto';
+import { ExchangeAddManualDto, ExchangeBuyDto } from '@src/exchange/dtos/buy.dto';
 import {
   CommonConfigItemResponse,
+  ExchangeItemResponse,
   ExchangeListResponse,
   OpenSaleItemResponse,
 } from '@src/exchange/dtos/exchange-response.dto';
@@ -46,6 +54,27 @@ export class ExchangeController {
   @ApiBadRequestResponse({ type: ErrorResponse })
   async getCommonConfig() {
     const result = await this.exchangeService.getCommonConfig();
+    return result;
+  }
+
+  //admin
+  @Post('add-manual')
+  @ApiCreatedResponse({ type: ExchangeItemResponse })
+  @ApiBadRequestResponse({ type: ErrorResponse })
+  async addManual(@Body() exchangeAddManualDto: ExchangeAddManualDto) {
+    const result = this.exchangeService.addManual(exchangeAddManualDto);
+    return result;
+  }
+
+  @Post('result')
+  @ApiOkResponse({ type: ExchangeListResponse })
+  @ApiBadRequestResponse({ type: ErrorResponse })
+  @ApiQuery({ type: PaginateDto })
+  async getResult(
+    @pagination() paginationParam: PaginateDto,
+    @Body() filterExchangeListDto: FilterExchangeListDto,
+  ) {
+    const result = await this.exchangeService.getResult(filterExchangeListDto, paginationParam);
     return result;
   }
 }

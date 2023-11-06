@@ -16,7 +16,9 @@ export class BlockchainService {
     private userService: UserService,
   ) {
     this.ownerWallet = this.configService.get<string>('ownerWallet');
-    this.provider = ethers.getDefaultProvider('https://bsc-dataseed.binance.org/');
+    this.provider = ethers.getDefaultProvider(
+      'https://rpc.ankr.com/bsc/5604b43661ba48f6ab7ef4b9970d5cd9b4fdb42357944ed24ca44374d640c604',
+    );
     this.savePresave();
   }
   async savePresave() {

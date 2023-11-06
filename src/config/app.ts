@@ -9,4 +9,6 @@ export default () => ({
   presaleId: process.env.PRESALE_ID || 1,
   currentTime: process.env.CURRENT_TIME || '',
   ownerWallet: process.env.OWNER_WALLET || '',
+  configSecretKey:
+    process.env.SECRET_KEY || 'nJVvIsM2KJY4HRQVL1lwZ5gBHo3TAcz/GHOWJaN90HhOyN2a7rCPI9iJqyU=',
 });
