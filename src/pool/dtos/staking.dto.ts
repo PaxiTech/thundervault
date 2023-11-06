@@ -1,9 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, Length } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
 export class StakingDto {
   @ApiProperty()
   @IsNotEmpty()
   token: string;
+
+  @ApiProperty()
+  @IsOptional()
+  refCode: string;
 
   @ApiProperty({ required: true })
   @IsNotEmpty()

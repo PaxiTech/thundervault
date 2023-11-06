@@ -9,42 +9,6 @@ export class PoolItem {
   @ApiProperty()
   _id: string;
 
-  @ApiProperty()
-  wallet: string;
-
-  @ApiProperty()
-  transactionHash?: string;
-
-  @ApiProperty()
-  ownerWallet?: string;
-
-  @ApiProperty()
-  amount: number;
-
-  @ApiProperty()
-  price: number;
-
-  @ApiProperty()
-  roundId?: string;
-
-  @ApiProperty()
-  ticketPrice: number;
-
-  @ApiProperty()
-  amountForOneTicket: number;
-
-  @ApiProperty({ enum: PoolType })
-  poolType: PoolType;
-
-  @ApiProperty()
-  amountToken: number;
-
-  @ApiProperty()
-  amountTicket: number;
-
-  @ApiProperty()
-  createTime: string;
-
   @ApiProperty({ type: Date })
   createdAt?: Date;
 

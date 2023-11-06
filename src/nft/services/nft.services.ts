@@ -104,6 +104,7 @@ export class NftService {
       token: nft.token,
       description: nft.description,
       level: nft.level,
+      earningTime: nft.earningTime,
       image: nft.image,
       owner: nft.owner,
       createdAt: _get(nft, 'createdAt'),

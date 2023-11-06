@@ -85,4 +85,9 @@ export const Errors = {
     message: 'The nft does not exist.',
     status: HttpStatus.NOT_FOUND,
   },
+  REFERRAL_CODE_INVALID: {
+    code: 'REFERRAL_CODE_INVALID',
+    message: 'The ref code is invalid.',
+    status: HttpStatus.NOT_FOUND,
+  },
 };

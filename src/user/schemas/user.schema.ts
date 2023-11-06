@@ -5,17 +5,13 @@ import * as paginate from 'mongoose-paginate-v2';
 export type UserDocument = HydratedDocument<User>;
 
 export const USER_LEVEL = {
-  USER_LEVEL_0: 0,
-  USER_LEVEL_1: 1,
-  USER_LEVEL_2: 2,
-  USER_LEVEL_3: 3,
-  USER_LEVEL_4: 4,
-  USER_LEVEL_5: 5,
-  USER_LEVEL_6: 6,
-  USER_LEVEL_7: 7,
-  USER_LEVEL_8: 8,
-  USER_LEVEL_9: 9,
-  USER_LEVEL_10: 10,
+  BEGINNER: 0,
+  BRONZE: 1,
+  SILVER: 2,
+  GOLD: 3,
+  PLATINUM: 4,
+  RUBY: 5,
+  DIAMOND: 6,
 };
 
 //có 8 cấp ref ứng với 8 col ref_level
@@ -34,7 +30,7 @@ export class User {
 
   @ApiProperty()
   @Prop({
-    default: USER_LEVEL.USER_LEVEL_0,
+    default: USER_LEVEL.BEGINNER,
   })
   level: number;
 

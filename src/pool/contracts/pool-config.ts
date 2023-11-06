@@ -1,51 +1,135 @@
-import { PoolType } from '@src/pool/dtos/pool-response.dto';
-export const presaleConfig = [
-  {
-    id: 'round-1',
-    poolType: PoolType.PRIVATE_SALE,
-    startTime: '2023-10-10 00:00:00',
-    startSaleTime: '2023-11-01 12:00:00',
-    endTime: '2023-11-01 13:59:59',
-    price: 0.1,
-    ticketPrice: 6000,
-    amountForOneTicket: 60000,
-    maxTicket: 10,
-    maxToken: 600000,
+import { USER_LEVEL } from '@src/user/schemas/user.schema';
+const { BRONZE, SILVER, GOLD, PLATINUM, RUBY, DIAMOND } = USER_LEVEL;
+export const brokerageFeeStaking = {
+  F1: {
+    [BRONZE]: 0.05, //5%
+    [SILVER]: 0.1, // 10%
+    [GOLD]: 0.15, //15%
+    [PLATINUM]: 0.2, //20%
+    [RUBY]: 0.25, //25%
+    [DIAMOND]: 0.3, // 30%
   },
-  {
-    id: 'round-2',
-    poolType: PoolType.PRIVATE_SALE,
-    startTime: '2023-11-01 00:00:00',
-    startSaleTime: '2023-11-02 00:00:00',
-    endTime: '2023-11-30 23:59:59',
-    price: 0.125,
-    ticketPrice: 2500,
-    amountForOneTicket: 20000,
-    maxTicket: 35,
-    maxToken: 700000,
+  F2: {
+    [BRONZE]: 0.0, //0%
+    [SILVER]: 0.02, // 2%
+    [GOLD]: 0.04, //4%
+    [PLATINUM]: 0.06, //6%
+    [RUBY]: 0.08, //8%
+    [DIAMOND]: 0.1, // 10%
   },
-  {
-    id: 'round-3',
-    poolType: PoolType.PRIVATE_SALE,
-    startTime: '2023-12-01 00:00:00',
-    startSaleTime: '2023-12-02 00:00:00',
-    endTime: '2023-12-31 23:59:59',
-    price: 0.15,
-    ticketPrice: 1050,
-    amountForOneTicket: 7000,
-    maxTicket: 100,
-    maxToken: 700000,
+  F3: {
+    [BRONZE]: 0.0, //0%
+    [SILVER]: 0.015, // 1.5%
+    [GOLD]: 0.03, //3%
+    [PLATINUM]: 0.045, //4,5%
+    [RUBY]: 0.06, //6%
+    [DIAMOND]: 0.075, // 7,5%
   },
-  {
-    id: 'round-4',
-    poolType: PoolType.PUBLIC_SALE,
-    startTime: '2024-01-01 00:00:00',
-    startSaleTime: '2024-01-02 00:00:00',
-    endTime: '2024-01-31 23:59:59',
-    price: 0.2,
-    ticketPrice: 200,
-    amountForOneTicket: 1000,
-    maxTicket: 300,
-    maxToken: 300000,
+  F4: {
+    [BRONZE]: 0.0, //0%
+    [SILVER]: 0.0, // 0%
+    [GOLD]: 0.015, //1.5%
+    [PLATINUM]: 0.03, //3%
+    [RUBY]: 0.045, //4.5%
+    [DIAMOND]: 0.06, // 6%
   },
-];
+  F5: {
+    [BRONZE]: 0.0, //0%
+    [SILVER]: 0.0, // 0%
+    [GOLD]: 0.01, //1%
+    [PLATINUM]: 0.02, //2%
+    [RUBY]: 0.03, //3%
+    [DIAMOND]: 0.04, // 4%
+  },
+  F6: {
+    [BRONZE]: 0.0, //0%
+    [SILVER]: 0.0, // 0%
+    [GOLD]: 0.0, //0%
+    [PLATINUM]: 0.01, //1%
+    [RUBY]: 0.02, //2%
+    [DIAMOND]: 0.03, // 3%
+  },
+  F7: {
+    [BRONZE]: 0.0, //0%
+    [SILVER]: 0.0, // 0%
+    [GOLD]: 0.0, //0%
+    [PLATINUM]: 0.0, //0%
+    [RUBY]: 0.005, //0.5%
+    [DIAMOND]: 0.01, // 1%
+  },
+  F8: {
+    [BRONZE]: 0.0, //0%
+    [SILVER]: 0.0, // 0%
+    [GOLD]: 0.0, //0%
+    [PLATINUM]: 0.0, //0%
+    [RUBY]: 0.0, //0%
+    [DIAMOND]: 0.005, // 1%
+  },
+};
+
+export const brokerageFeeMarket = {
+  F1: {
+    [BRONZE]: 0.1, //10%
+    [SILVER]: 0.2, // 20%
+    [GOLD]: 0.3, //35%
+    [PLATINUM]: 0.4, //40%
+    [RUBY]: 0.5, //55%
+    [DIAMOND]: 0.6, // 60%
+  },
+  F2: {
+    [BRONZE]: 0.0, //0%
+    [SILVER]: 0.05, //5%
+    [GOLD]: 0.1, //10%
+    [PLATINUM]: 0.15, //15%
+    [RUBY]: 0.2, //20%
+    [DIAMOND]: 0.25, // 25%
+  },
+  F3: {
+    [BRONZE]: 0.0, //0%
+    [SILVER]: 0.025, // 2,5%
+    [GOLD]: 0.05, //5%
+    [PLATINUM]: 0.075, //7.5%
+    [RUBY]: 0.1, //10%
+    [DIAMOND]: 0.125, // 12,5%
+  },
+  F4: {
+    [BRONZE]: 0.0, //0%
+    [SILVER]: 0.0, // 0%
+    [GOLD]: 0.015, //1.5%
+    [PLATINUM]: 0.03, //3%
+    [RUBY]: 0.045, //4.5%
+    [DIAMOND]: 0.06, // 6%
+  },
+  F5: {
+    [BRONZE]: 0.0, //0%
+    [SILVER]: 0.0, // 0%
+    [GOLD]: 0.01, //1%
+    [PLATINUM]: 0.02, //2%
+    [RUBY]: 0.03, //3%
+    [DIAMOND]: 0.04, // 4%
+  },
+  F6: {
+    [BRONZE]: 0.0, //0%
+    [SILVER]: 0.0, // 0%
+    [GOLD]: 0.0, //0%
+    [PLATINUM]: 0.0025, //0,25%
+    [RUBY]: 0.005, //0.5%
+    [DIAMOND]: 0.0075, // 0.75%
+  },
+  F7: {
+    [BRONZE]: 0.0, //0%
+    [SILVER]: 0.0, // 0%
+    [GOLD]: 0.0, //0%
+    [PLATINUM]: 0.0, //0%
+    [RUBY]: 0.0025, //0,25%
+    [DIAMOND]: 0.005, // 0.5%
+  },
+  F8: {
+    [BRONZE]: 0.0, //0%
+    [SILVER]: 0.0, // 0%
+    [GOLD]: 0.0, //0%
+    [PLATINUM]: 0.0, //0%
+    [RUBY]: 0.0, //0%
+    [DIAMOND]: 0.0025, // 0,25%
+  },
+};

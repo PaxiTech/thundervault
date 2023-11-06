@@ -13,6 +13,30 @@ export class UserItem {
   @ApiProperty()
   referralCode: number;
 
+  @ApiProperty()
+  refLevel1?: string;
+
+  @ApiProperty()
+  refLevel2?: string;
+
+  @ApiProperty()
+  refLevel3?: string;
+
+  @ApiProperty()
+  refLevel4?: string;
+
+  @ApiProperty()
+  refLevel5?: string;
+
+  @ApiProperty()
+  refLevel6?: string;
+
+  @ApiProperty()
+  refLevel7?: string;
+
+  @ApiProperty()
+  refLevel8?: string;
+
   @ApiProperty({ type: Date })
   createdAt?: Date;
 

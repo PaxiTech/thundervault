@@ -7,7 +7,7 @@ import { UserService } from '@src/user/services/user.services';
 import { UtilHelperService } from '@src/utils/helper.service';
 import { get as _get } from 'lodash';
 import { NftService } from '@src/nft/services/nft.services';
-import { UserDocument } from '@src/user/schemas/user.schema';
+import { UserItem } from '@src/user/dtos/user-response.dto';
 
 @Injectable()
 export class PoolService {
@@ -30,23 +30,34 @@ export class PoolService {
       level: pool?.level,
       from: pool?.from,
       to: pool?.to,
-      createTime: pool?.createTime,
       createdAt: _get(pool, 'createdAt'),
       updatedAt: _get(pool, 'updatedAt'),
     };
     return data;
   }
   public async staking(stakingDto: StakingDto): Promise<any> {
-    const { from, to, token } = stakingDto;
+    const { from, to, token, refCode } = stakingDto;
     const userInfo = await this.userService.getUserInfo(from, { getReferralCode: true });
     const nftInfo = await this.nftService.getNftInfo(token);
-    await this.calReferralStaking(nftInfo.level, userInfo);
-    const poolEntity = await this.poolRepository.create(stakingDto);
+    const createData = {
+      nft: token,
+      level: nftInfo.level,
+      from: from,
+      to: to,
+      remainTime: nftInfo.earningTime,
+    };
+    const poolEntity = await this.poolRepository.create(createData);
     const poolInfo = this.populatePoolInfo(poolEntity);
+    //update ref code
+    if (refCode) {
+      const parentUserInfo = await this.userService.getUserInfoByReferralCode(refCode);
+      await this.userService.processReferralCode(from, parentUserInfo.wallet);
+    }
+    await this.processReferralStaking(nftInfo.level, userInfo);
     return poolInfo;
   }
 
-  public async calReferralStaking(tokenLevel: number, UserInfo: any) {
+  public async processReferralStaking(tokenLevel: number, UserInfo: UserItem) {
     const {
       refLevel1,
       refLevel2,

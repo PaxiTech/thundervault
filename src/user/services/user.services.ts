@@ -6,6 +6,7 @@ import { AppException } from '@src/common/exceptions/app.exception';
 import { UserRepository } from '@src/user/repositories/user.repository';
 import { UserDocument } from '@src/user/schemas/user.schema';
 import { get as _get } from 'lodash';
+import { UserItem } from '@src/user/dtos/user-response.dto';
 @Injectable()
 export class UserService {
   constructor(
@@ -27,7 +28,7 @@ export class UserService {
     }
     //nếu chưa tạo referral code thì sẽ tạo. case này xử lý cho những user được tạo trước lúc release chức năng referral code.
     if (!entity?.referralCode) {
-      entity = await this.updateReferralCode(wallet);
+      entity = await this.addReferralCode(wallet);
     }
     const userInfo = this.populateUserInfo(entity);
     return userInfo;
@@ -37,10 +38,11 @@ export class UserService {
    * @param user {UserDocument}
    * @returns
    */
-  public populateUserInfo(user: UserDocument, options?: any) {
+  public populateUserInfo(user: UserDocument, options?: any): UserItem {
     let data = {
+      _id: _get(user, '_id'),
       wallet: user.wallet,
-      referralCode: user?.referralCode || '',
+      referralCode: _get(user, 'referralCode', ''),
       level: user?.level || 0,
       createdAt: _get(user, 'createdAt'),
       updatedAt: _get(user, 'updatedAt'),
@@ -61,7 +63,7 @@ export class UserService {
     return data;
   }
 
-  public async updateReferralCode(wallet: string) {
+  public async addReferralCode(wallet: string) {
     const referralCode = await this.generateReferralCode();
     const conditions = { wallet: wallet };
     const options = { new: true };
@@ -112,5 +114,37 @@ export class UserService {
     }
 
     return code;
+  }
+
+  public async processReferralCode(wallet: string, parentWallet: string): Promise<UserItem> {
+    const parentUserInfo = await this.getUserInfo(parentWallet, { getReferralCode: true });
+    const conditions = { wallet: wallet };
+    const options = { new: true };
+    //set referral code from referral code of parent
+    const updateData = {
+      refLevel1: parentWallet,
+      refLevel2: parentUserInfo.refLevel1,
+      refLevel3: parentUserInfo.refLevel2,
+      refLevel4: parentUserInfo.refLevel3,
+      refLevel5: parentUserInfo.refLevel4,
+      refLevel6: parentUserInfo.refLevel5,
+      refLevel7: parentUserInfo.refLevel6,
+      refLevel8: parentUserInfo.refLevel7,
+    };
+    const entity = await this.userRepository.findOneAndUpdate(conditions, updateData, options);
+    return this.populateUserInfo(entity);
+  }
+
+  public async getUserInfoByReferralCode(referralCode: string): Promise<UserItem> {
+    const conditions = { referralCode: referralCode };
+    const entity = await this.userRepository.findOne({
+      conditions: conditions,
+    });
+    if (!entity) {
+      const { code, message, status } = Errors.REFERRAL_CODE_INVALID;
+      throw new AppException(code, message, status);
+    }
+    const userInfo = this.populateUserInfo(entity);
+    return userInfo;
   }
 }

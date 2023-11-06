@@ -27,10 +27,6 @@ export class Pool {
 
   @ApiProperty()
   @Prop()
-  createTime: string;
-
-  @ApiProperty()
-  @Prop()
   remainTime: string;
 }
 

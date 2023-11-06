@@ -22,6 +22,9 @@ export class NftItem {
   level: number;
 
   @ApiProperty()
+  earningTime: number;
+
+  @ApiProperty()
   image: string;
 
   @ApiProperty()
