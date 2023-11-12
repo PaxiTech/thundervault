@@ -17,7 +17,7 @@ export const presaleConfig = [
     exchangeType: ExchangeType.PRIVATE_SALE,
     startTime: '2023-11-05 00:00:00',
     startSaleTime: '2023-11-12 14:00:00',
-    endTime: '2023-11-14 14:00:00',
+    endTime: '2023-11-15 14:00:00',
     price: 0.125,
     ticketPrice: 2500,
     amountForOneTicket: 20000,
