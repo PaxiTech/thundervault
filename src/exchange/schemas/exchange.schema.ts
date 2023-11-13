@@ -24,6 +24,14 @@ export class Exchange {
 
   @ApiProperty()
   @Prop()
+  preRefWallet: string;
+
+  @ApiProperty()
+  @Prop()
+  preRefAmount: number;
+
+  @ApiProperty()
+  @Prop()
   amount: number;
 
   @ApiProperty()

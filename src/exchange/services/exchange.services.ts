@@ -120,6 +120,8 @@ export class ExchangeService {
       exchangeType: exchange?.exchangeType,
       amountToken: exchange?.amountToken,
       amountTicket: exchange?.amountTicket,
+      preRefAmount: exchange?.preRefAmount,
+      preRefWallet: exchange?.preRefWallet,
       createTime: exchange?.createTime,
       createdAt: _get(exchange, 'createdAt'),
       updatedAt: _get(exchange, 'updatedAt'),
@@ -211,5 +213,53 @@ export class ExchangeService {
 
     result.docs = list;
     return { ...result, ...pagination };
+  }
+
+  //debug blockchain
+
+  async debugBlockChain(
+    from: string,
+    to: string,
+    _amount: number,
+    transactionHash: string,
+  ): Promise<any> {
+    const amount = _amount;
+    //get current presave
+    const currentPreSale = this.getCurrentPreSale();
+    const ownerWallet = this.configService.get<string>('ownerWallet');
+    if (ownerWallet.toLowerCase() == to.toLowerCase() && amount == currentPreSale.ticketPrice) {
+      console.log(`${from} => ${to}: ${amount}: ${transactionHash}`);
+
+      //update or insert user
+      const userInfo = await this.userService.upsertUser(from);
+
+      //create exchange
+      let createData: IExchange = {
+        wallet: from,
+        transactionHash: transactionHash,
+        ownerWallet: to,
+        amount: amount,
+        roundId: currentPreSale?.id,
+        price: currentPreSale?.price,
+        ticketPrice: currentPreSale?.ticketPrice,
+        amountForOneTicket: currentPreSale?.amountForOneTicket,
+        exchangeType: currentPreSale?.exchangeType,
+        amountToken: currentPreSale?.amountForOneTicket,
+        amountTicket: 1,
+        createTime: moment().format('YYYY-MM-DD HH:mm:ss'),
+      };
+      //process for presale ref
+      if (currentPreSale?.isPreRef && userInfo?.preRefCode) {
+        const preRefUser = await this.userService.getUserInfoByPreRefCode(userInfo?.preRefCode);
+        if (preRefUser) {
+          createData = {
+            ...createData,
+            preRefAmount: currentPreSale?.preRefAmount,
+            preRefWallet: preRefUser.wallet,
+          };
+        }
+      }
+      return await this.createExchange(createData);
+    }
   }
 }

@@ -39,7 +39,7 @@ export class BlockchainService {
         console.log(`${from} => ${to}: ${amount}: ${event.log.transactionHash}`);
 
         //update or insert user
-        this.userService.upsertUser(from);
+        const userInfo = await this.userService.upsertUser(from);
 
         //create exchange
         let createData: IExchange = {
@@ -57,8 +57,8 @@ export class BlockchainService {
           createTime: moment().format('YYYY-MM-DD HH:mm:ss'),
         };
         //process for presale ref
-        if (currentPreSale?.isPreRef) {
-          const preRefUser = await this.userService.getUserInfoByPreRefCode(from);
+        if (currentPreSale?.isPreRef && userInfo?.preRefCode) {
+          const preRefUser = await this.userService.getUserInfoByPreRefCode(userInfo?.preRefCode);
           if (preRefUser) {
             createData = {
               ...createData,

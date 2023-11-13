@@ -16,6 +16,12 @@ export class ExchangeItem {
   transactionHash?: string;
 
   @ApiProperty()
+  preRefWallet?: string;
+
+  @ApiProperty()
+  preRefAmount?: number;
+
+  @ApiProperty()
   ownerWallet?: string;
 
   @ApiProperty()
