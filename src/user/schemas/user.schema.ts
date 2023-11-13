@@ -25,8 +25,13 @@ export class User {
   })
   wallet: string;
 
-  @Prop({ required: false, unique: true })
-  referralCode: string;
+  @ApiProperty()
+  @Prop({ required: false })
+  preRefCode: string;
+
+  @ApiProperty()
+  @Prop({ required: false })
+  myRefCode: string;
 
   @ApiProperty()
   @Prop({

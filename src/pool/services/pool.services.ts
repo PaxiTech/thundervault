@@ -37,7 +37,7 @@ export class PoolService {
   }
   public async staking(stakingDto: StakingDto): Promise<any> {
     const { from, to, token, refCode } = stakingDto;
-    const userInfo = await this.userService.getUserInfo(from, { getReferralCode: true });
+    const userInfo = await this.userService.getUserInfo(from, { getMyRefCode: true });
     const nftInfo = await this.nftService.getNftInfo(token);
     const createData = {
       nft: token,
@@ -50,8 +50,8 @@ export class PoolService {
     const poolInfo = this.populatePoolInfo(poolEntity);
     //update ref code
     if (refCode) {
-      const parentUserInfo = await this.userService.getUserInfoByReferralCode(refCode);
-      await this.userService.processReferralCode(from, parentUserInfo.wallet);
+      const parentUserInfo = await this.userService.getUserInfoByMyRefCode(refCode);
+      await this.userService.processMyRefCode(from, parentUserInfo.wallet);
     }
     await this.processReferralStaking(nftInfo.level, userInfo);
     return poolInfo;

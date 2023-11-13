@@ -11,7 +11,10 @@ export class UserItem {
   level: number;
 
   @ApiProperty()
-  referralCode: number;
+  preRefCode: string;
+
+  @ApiProperty()
+  myRefCode: string;
 
   @ApiProperty()
   refLevel1?: string;

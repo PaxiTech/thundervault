@@ -139,7 +139,7 @@ export class ExchangeService {
     return data;
   }
 
-  public async createExchange(createData): Promise<any> {
+  public async createExchange(createData: IExchange): Promise<any> {
     const exchangeEntity = await this.exchangeRepository.create(createData);
     const exchangeInfo = this.populateExchangeInfo(exchangeEntity);
     return exchangeInfo;
@@ -158,7 +158,7 @@ export class ExchangeService {
     //get current presave
     const currentPreSale = this.getCurrentPreSale();
     //create exchange
-    const createData: IExchange = {
+    let createData: IExchange = {
       wallet: from,
       transactionHash: transactionHash,
       ownerWallet: to,
@@ -172,6 +172,17 @@ export class ExchangeService {
       amountTicket: 1,
       createTime: moment().format('YYYY-MM-DD HH:mm:ss'),
     };
+    //process for presale ref
+    if (currentPreSale?.isPreRef) {
+      const preRefUser = await this.userService.getUserInfoByPreRefCode(from);
+      if (preRefUser) {
+        createData = {
+          ...createData,
+          preRefAmount: currentPreSale?.preRefAmount,
+          preRefWallet: preRefUser.wallet,
+        };
+      }
+    }
     return this.createExchange(createData);
   }
 
