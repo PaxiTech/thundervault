@@ -16,7 +16,9 @@ export class BlockchainService {
     private userService: UserService,
   ) {
     this.ownerWallet = this.configService.get<string>('ownerWallet');
-    this.provider = ethers.getDefaultProvider('https://bsc-dataseed.binance.org/');
+    this.provider = ethers.getDefaultProvider(
+      'https://rpc.ankr.com/bsc/5604b43661ba48f6ab7ef4b9970d5cd9b4fdb42357944ed24ca44374d640c604',
+    );
     this.savePresave();
   }
   async savePresave() {
@@ -28,13 +30,17 @@ export class BlockchainService {
 
     contract.on('Transfer', (from, to: string, _amount, event) => {
       const amount = +formatEther(_amount);
-      if (this.ownerWallet.toLowerCase() == to.toLowerCase() && amount == 6000) {
+      //get current presave
+      const currentPreSale = this.exchangeService.getCurrentPreSale();
+      if (
+        this.ownerWallet.toLowerCase() == to.toLowerCase() &&
+        amount == currentPreSale.ticketPrice
+      ) {
         console.log(`${from} => ${to}: ${amount}: ${event.log.transactionHash}`);
 
         //update or insert user
         this.userService.upsertUser(from);
-        //get current presave
-        const currentPreSale = this.exchangeService.getCurrentPreSale();
+
         //create exchange
         const createData: IExchange = {
           wallet: from,

@@ -6,3 +6,9 @@ export class FilterExchangeListDto extends CommonDto {
   @IsOptional()
   roundId: string;
 }
+
+export class ExchangeResultDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  roundId: string;
+}

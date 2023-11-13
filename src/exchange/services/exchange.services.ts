@@ -5,7 +5,7 @@ import { PaginateDto } from '@src/common/dtos/paginate.dto';
 import { AppException } from '@src/common/exceptions/app.exception';
 import { presaleConfig } from '@src/exchange/contracts/exchange-config';
 import { CommonConfigItem, ExchangeListItem } from '@src/exchange/dtos/exchange-response.dto';
-import { FilterExchangeListDto } from '@src/exchange/dtos/list.dto';
+import { ExchangeResultDto, FilterExchangeListDto } from '@src/exchange/dtos/list.dto';
 import { ExchangeRepository } from '@src/exchange/repositories/exchange.repository';
 import { ExchangeDocument } from '@src/exchange/schemas/exchange.schema';
 import { UtilHelperService } from '@src/utils/helper.service';
@@ -181,7 +181,7 @@ export class ExchangeService {
    * @returns
    */
   async getResult(
-    filterExchangeListDto: FilterExchangeListDto,
+    filterExchangeListDto: ExchangeResultDto,
     paginationParam: PaginateDto,
   ): Promise<any> {
     const roundId = filterExchangeListDto.roundId ?? this.configService.get<string>('presaleId');
