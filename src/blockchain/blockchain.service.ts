@@ -30,13 +30,17 @@ export class BlockchainService {
 
     contract.on('Transfer', (from, to: string, _amount, event) => {
       const amount = +formatEther(_amount);
-      if (this.ownerWallet.toLowerCase() == to.toLowerCase() && amount == 6000) {
+      //get current presave
+      const currentPreSale = this.exchangeService.getCurrentPreSale();
+      if (
+        this.ownerWallet.toLowerCase() == to.toLowerCase() &&
+        amount == currentPreSale.ticketPrice
+      ) {
         console.log(`${from} => ${to}: ${amount}: ${event.log.transactionHash}`);
 
         //update or insert user
         this.userService.upsertUser(from);
-        //get current presave
-        const currentPreSale = this.exchangeService.getCurrentPreSale();
+
         //create exchange
         const createData: IExchange = {
           wallet: from,
