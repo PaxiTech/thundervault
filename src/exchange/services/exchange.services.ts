@@ -215,6 +215,27 @@ export class ExchangeService {
     return { ...result, ...pagination };
   }
 
+  //ref pre sale
+  /**
+   *
+   * @param paginationParam
+   * @returns
+   */
+  async getPresaleRefListByUser(preRefWallet: string): Promise<any> {
+    const roundId = this.configService.get<string>('presaleId');
+    const conditions = {
+      preRefWallet: preRefWallet,
+      roundId: roundId,
+    };
+    const exchangeList = await this.exchangeRepository.find({
+      conditions: conditions,
+    });
+    const result = exchangeList.map((item) => {
+      return this.populateExchangeInfo(item);
+    });
+
+    return result;
+  }
   //debug blockchain
 
   async debugBlockChain(

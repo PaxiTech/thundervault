@@ -16,22 +16,6 @@ export class UserService {
   ) {}
 
   //process for presale referral code
-  public async generatepreRefCode(): Promise<string> {
-    let preRefCode: string;
-    let isUnique = false;
-
-    while (!isUnique) {
-      preRefCode = this.generateRandomCode(10); // Set the desired code length here
-
-      const existingCode = await this.userRepository.findOne({
-        conditions: { preRefCode: preRefCode },
-      });
-
-      isUnique = !existingCode;
-    }
-
-    return preRefCode;
-  }
 
   public async addPreRefCode(wallet: string, preRefCode: string) {
     const conditions = { wallet: wallet };
@@ -46,7 +30,8 @@ export class UserService {
   }
 
   public async getUserInfoByPreRefCode(preRefCode: string): Promise<UserItem> {
-    const conditions = { preRefCode: preRefCode };
+    //tìm user có myrefcode là prerefcode cua user cần tìm.
+    const conditions = { myRefCode: preRefCode };
     const entity = await this.userRepository.findOne({
       conditions: conditions,
     });

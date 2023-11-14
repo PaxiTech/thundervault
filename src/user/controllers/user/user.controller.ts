@@ -4,18 +4,20 @@ import { ErrorResponse } from '@src/common/contracts/openapi';
 import { UserService } from '@src/user/services/user.services';
 import { UserItemResponse } from '@src/user/dtos/user-response.dto';
 import { UserPreRefDto } from '@src/user/dtos/user-presale-referral.dto';
+import { ExchangeService } from '@src/exchange/services/exchange.services';
 
 @ApiTags('User')
 @Controller('user')
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(private userService: UserService, private exchangeService: ExchangeService) {}
 
   @Post('profile')
   @ApiOkResponse({ type: UserItemResponse })
   @ApiBadRequestResponse({ type: ErrorResponse })
   async getProfile(@Body() userPreRefDto: UserPreRefDto) {
     const { wallet, preRefCode } = userPreRefDto;
-    const result = await this.userService.createUpdateProfile(wallet, { preRefCode: preRefCode });
-    return result;
+    const userInfo = await this.userService.createUpdateProfile(wallet, { preRefCode: preRefCode });
+    const preRefExchangeInfo = await this.exchangeService.getPresaleRefListByUser(wallet);
+    return { ...userInfo, preRefExchange: preRefExchangeInfo };
   }
 }
