@@ -11,4 +11,6 @@ export interface IExchange {
   amountToken: number;
   amountTicket: number;
   createTime: string;
+  preRefWallet?: string;
+  preRefAmount?: number;
 }

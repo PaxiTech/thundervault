@@ -1,21 +1,23 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { ErrorResponse } from '@src/common/contracts/openapi';
-import { CommonDto } from '@src/common/dtos/common.dto';
 import { UserService } from '@src/user/services/user.services';
 import { UserItemResponse } from '@src/user/dtos/user-response.dto';
+import { UserPreRefDto } from '@src/user/dtos/user-presale-referral.dto';
+import { ExchangeService } from '@src/exchange/services/exchange.services';
 
 @ApiTags('User')
 @Controller('user')
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(private userService: UserService, private exchangeService: ExchangeService) {}
 
   @Post('profile')
   @ApiOkResponse({ type: UserItemResponse })
   @ApiBadRequestResponse({ type: ErrorResponse })
-  async getProfile(@Body() commonDto: CommonDto) {
-    const { wallet } = commonDto;
-    const result = await this.userService.getUserInfo(wallet);
-    return result;
+  async getProfile(@Body() userPreRefDto: UserPreRefDto) {
+    const { wallet, preRefCode } = userPreRefDto;
+    const userInfo = await this.userService.createUpdateProfile(wallet, { preRefCode: preRefCode });
+    const preRefExchangeInfo = await this.exchangeService.getPresaleRefListByUser(wallet);
+    return { ...userInfo, preRefExchange: preRefExchangeInfo };
   }
 }

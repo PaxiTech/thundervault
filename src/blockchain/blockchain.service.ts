@@ -28,7 +28,7 @@ export class BlockchainService {
       this.provider,
     );
 
-    contract.on('Transfer', (from, to: string, _amount, event) => {
+    contract.on('Transfer', async (from, to: string, _amount, event) => {
       const amount = +formatEther(_amount);
       //get current presave
       const currentPreSale = this.exchangeService.getCurrentPreSale();
@@ -39,10 +39,10 @@ export class BlockchainService {
         console.log(`${from} => ${to}: ${amount}: ${event.log.transactionHash}`);
 
         //update or insert user
-        this.userService.upsertUser(from);
+        const userInfo = await this.userService.upsertUser(from);
 
         //create exchange
-        const createData: IExchange = {
+        let createData: IExchange = {
           wallet: from,
           transactionHash: event.log.transactionHash,
           ownerWallet: to,
@@ -56,6 +56,17 @@ export class BlockchainService {
           amountTicket: 1,
           createTime: moment().format('YYYY-MM-DD HH:mm:ss'),
         };
+        //process for presale ref
+        if (currentPreSale?.isPreRef && userInfo?.preRefCode) {
+          const preRefUser = await this.userService.getUserInfoByPreRefCode(userInfo?.preRefCode);
+          if (preRefUser) {
+            createData = {
+              ...createData,
+              preRefAmount: currentPreSale?.preRefAmount,
+              preRefWallet: preRefUser.wallet,
+            };
+          }
+        }
         this.exchangeService.createExchange(createData);
       }
     });
