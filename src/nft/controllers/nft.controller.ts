@@ -9,7 +9,7 @@ import { DetailNftDto } from '@src/nft/dtos/list.dto';
 export class NftController {
   constructor(private nftService: NftService) {}
 
-  @Post('detail')
+  @Post('mint')
   @ApiOkResponse({ type: NftItemResponse })
   @ApiBadRequestResponse({ type: ErrorResponse })
   async getNftInfo(@Body() detailNftDto: DetailNftDto) {

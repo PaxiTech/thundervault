@@ -58,6 +58,20 @@ export class UserService {
     }
     // tương tự sẽ tạo presale referral code sử dụng cho presale.
     if (_isEmpty(entity?.preRefCode) && !_isEmpty(option?.preRefCode)) {
+      //kiểm tra tính hợp lệ của refCode
+      const parentUser = await this.userRepository.findOne({
+        conditions: { myRefCode: option?.preRefCode },
+      });
+      //không tồn tại mã ref
+      if (!parentUser) {
+        const { code, message, status } = Errors.REFERRAL_CODE_INVALID;
+        throw new AppException(code, message, status);
+      }
+      // không thể giới thiệu chính mình.
+      if (parentUser.wallet == wallet) {
+        const { code, message, status } = Errors.REFERRAL_CODE_INVALID_YOURSELF;
+        throw new AppException(code, message, status);
+      }
       entity = await this.addPreRefCode(wallet, option?.preRefCode);
     }
     const userInfo = this.populateUserInfo(entity, option);

@@ -19,4 +19,7 @@ export class DetailNftDto {
     maxLength: 42,
   })
   token: string;
+
+  @IsNotEmpty()
+  level: number;
 }

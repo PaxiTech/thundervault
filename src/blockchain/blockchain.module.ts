@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { BlockchainService } from './blockchain.service';
 import { ExchangeModule } from '@src/exchange/exchange.module';
+import { NftModule } from '@src/nft/nft.module';
 
 @Module({
   providers: [BlockchainService],
-  imports: [ExchangeModule],
+  imports: [ExchangeModule, NftModule],
 })
 export class BlockchainModule {}
