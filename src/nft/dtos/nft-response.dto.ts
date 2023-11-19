@@ -10,25 +10,16 @@ export class NftItem {
   _id: string;
 
   @ApiProperty()
-  name: string;
-
-  @ApiProperty()
   token: string;
 
   @ApiProperty()
-  description: string;
+  owner: string;
 
   @ApiProperty()
   level: number;
 
   @ApiProperty()
-  earningTime: number;
-
-  @ApiProperty()
-  image: string;
-
-  @ApiProperty()
-  owner: string;
+  earningTime?: number;
 
   @ApiProperty({ type: Date })
   createdAt?: Date;

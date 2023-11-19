@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { IExchange } from '@src/exchange/interfaces/exchange.interface';
 import { ExchangeService } from '@src/exchange/services/exchange.services';
+import { NftService } from '@src/nft/services/nft.services';
+import { INft } from '@src/nft/interfaces/nft.interface';
 import { UserService } from '@src/user/services/user.services';
 import { Contract, ethers, formatEther } from 'ethers';
 import * as moment from 'moment-timezone';
@@ -14,12 +16,14 @@ export class BlockchainService {
     private configService: ConfigService,
     private exchangeService: ExchangeService,
     private userService: UserService,
+    private nftService: NftService,
   ) {
     this.ownerWallet = this.configService.get<string>('ownerWallet');
     this.provider = ethers.getDefaultProvider(
       'https://rpc.ankr.com/bsc/5604b43661ba48f6ab7ef4b9970d5cd9b4fdb42357944ed24ca44374d640c604',
     );
     this.savePresave();
+    this.mintNft();
   }
   async savePresave() {
     const contract = new Contract(
@@ -69,6 +73,30 @@ export class BlockchainService {
         }
         this.exchangeService.createExchange(createData);
       }
+    });
+  }
+  async mintNft() {
+    const mintNftAbi = ['event Mint(address indexed owner, address indexed token, uint level)'];
+    const mintNftContract = new Contract(
+      '0x55d398326f99059fF775485246999027B3197955',
+      mintNftAbi,
+      this.provider,
+    );
+
+    mintNftContract.on('Mint', async (owner, token, level, event) => {
+      console.log(`${owner}  ${token}: ${level}}`);
+
+      //update or insert user
+      await this.userService.upsertUser(owner);
+
+      //create Nft
+      const createData: INft = {
+        token: token,
+        owner: owner,
+        level: level,
+      };
+      const metaData = this.nftService.getMetadata(level);
+      this.nftService.generateNft({ ...createData, metaData: metaData });
     });
   }
 }

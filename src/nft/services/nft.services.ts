@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Errors } from '@src/common/contracts/error';
 import { PaginateDto } from '@src/common/dtos/paginate.dto';
-import { CreateNftDto } from '@src/nft/dtos/create.dto';
+import { AppException } from '@src/common/exceptions/app.exception';
 import { FilterNftListDto } from '@src/nft/dtos/list.dto';
 import { NftItem, NftListItem } from '@src/nft/dtos/nft-response.dto';
 import { NftRepository } from '@src/nft/repositories/nft.repository';
@@ -9,25 +10,23 @@ import { NftDocument } from '@src/nft/schemas/nft.schema';
 import { ethers } from 'ethers';
 import * as fs from 'fs';
 import { get as _get } from 'lodash';
-import { Errors } from '@src/common/contracts/error';
-import { AppException } from '@src/common/exceptions/app.exception';
+import { metaDataSimple } from '@src/nft/contracts/meta-data';
 
 @Injectable()
 export class NftService {
   constructor(private nftRepository: NftRepository, private configService: ConfigService) {}
 
-  public async createNft(createData: CreateNftDto): Promise<any> {
-    const ownerWallet = this.configService.get<string>('ownerWallet');
-    const nftToken = await this.generateNftToken();
+  public async generateNft(data): Promise<any> {
+    const { owner, token, level, metaData } = data;
+    //lưu nft master
     const nftEntity = await this.nftRepository.create({
-      ...createData,
-      token: nftToken,
-      owner: ownerWallet,
+      token: token,
+      owner: owner,
+      level: level,
     });
-    this.saveNFTAsJson(nftToken, createData);
+    // tạo file json cho nft
+    this.saveNFTAsJson(token, metaData);
     return nftEntity;
-    //const nftInfo = this.populateNftInfo(nftEntity);
-    //return nftInfo;
   }
 
   /**
@@ -35,12 +34,12 @@ export class NftService {
    * @param paginationParam
    * @returns
    */
-  async getNftList(filterQRcodeList: FilterNftListDto, paginationParam: PaginateDto) {
+  async getNftList(filterNftListDto: FilterNftListDto, paginationParam: PaginateDto) {
     const conditions = {};
     const nftList = await this.nftRepository.pagination({
       conditions: conditions,
       ...paginationParam,
-      select: ['_id', 'name', 'token', 'description', 'level', 'image', 'owner'],
+      select: ['_id', 'token', 'level', 'owner'],
     });
     const { docs = [], ...pagination } = nftList;
     const result = new NftListItem();
@@ -51,33 +50,15 @@ export class NftService {
     result.docs = list;
     return { ...result, ...pagination };
   }
-
-  public async generateNftToken(): Promise<string> {
-    let token: string;
-    let isUnique = false;
-
-    while (!isUnique) {
-      const wallet = ethers.Wallet.createRandom();
-      token = wallet.address; // Set the desired code length here
-
-      const existingNftToken = await this.nftRepository.findOne({
-        conditions: { token: token },
-      });
-
-      isUnique = !existingNftToken;
-    }
-
-    return token;
-  }
-  private saveNFTAsJson(token: string, data: any): void {
-    const nftJson = JSON.stringify(data);
+  private saveNFTAsJson(token: string, metaData: any): void {
+    const nftJson = JSON.stringify(metaData);
     const filesDestination = this.configService.get('nft_resource');
 
     const nftPath = `${filesDestination}${token}.json`;
     fs.writeFileSync(nftPath, nftJson);
   }
 
-  public async getNftInfo(token: string): Promise<NftItem> {
+  public async getNftInfo(token: string): Promise<any> {
     const conditions = {
       token: token,
     };
@@ -88,10 +69,15 @@ export class NftService {
       const { code, message, status } = Errors.NFT_NOT_EXIST;
       throw new AppException(code, message, status);
     }
-    const userInfo = this.populateNftInfo(entity);
-    return userInfo;
+    const nftInfo = this.populateNftInfo(entity);
+    return nftInfo;
   }
 
+  public getMetadata(nftLevel: number) {
+    if (metaDataSimple[nftLevel]) {
+      return metaDataSimple[nftLevel];
+    }
+  }
   /**
    * populateNftInfo
    * @param nft {NftDocument}
@@ -100,13 +86,10 @@ export class NftService {
   public populateNftInfo(nft: NftDocument) {
     const data = {
       _id: _get(nft, '_id'),
-      name: nft.name,
       token: nft.token,
-      description: nft.description,
-      level: nft.level,
-      earningTime: nft.earningTime,
-      image: nft.image,
       owner: nft.owner,
+      level: nft.level,
+      // earningTime: nft.earningTime,
       createdAt: _get(nft, 'createdAt'),
       updatedAt: _get(nft, 'updatedAt'),
     };

@@ -9,7 +9,7 @@ import { ExchangeResultDto, FilterExchangeListDto } from '@src/exchange/dtos/lis
 import { ExchangeRepository } from '@src/exchange/repositories/exchange.repository';
 import { ExchangeDocument } from '@src/exchange/schemas/exchange.schema';
 import { UtilHelperService } from '@src/utils/helper.service';
-import { get as _get, isEmpty as _isEmpty } from 'lodash';
+import { get as _get, isEmpty as _isEmpty, sumBy as _sumBy } from 'lodash';
 import * as moment from 'moment-timezone';
 import { IExchange } from '../interfaces/exchange.interface';
 import { ExchangeAddManualDto } from '@src/exchange/dtos/buy.dto';
@@ -221,8 +221,8 @@ export class ExchangeService {
    * @param paginationParam
    * @returns
    */
-  async getPresaleRefListByUser(preRefWallet: string): Promise<any> {
-    const roundId = this.configService.get<string>('presaleId');
+  async getPresaleRefListByUser(preRefWallet: string, roundId: string): Promise<any> {
+    //const roundId = this.configService.get<string>('presaleId');
     const conditions = {
       preRefWallet: preRefWallet,
       roundId: roundId,
@@ -233,6 +233,67 @@ export class ExchangeService {
     const result = exchangeList.map((item) => {
       return this.populateExchangeInfo(item);
     });
+
+    return result;
+  }
+  public getLastPreSale(): Array<any> {
+    const currentTime = this.helperService.getCurrentTime();
+    const lastPresale: any = presaleConfig.filter((item) => {
+      const startTime = moment(item.startTime).format('YYYY-MM-DD HH:mm:ss');
+      if (currentTime >= startTime) {
+        return item;
+      }
+    });
+
+    return lastPresale;
+  }
+  //list kê các thông tin của user.
+  async getSummaryByUser(wallet: string, option: any): Promise<any> {
+    const roundList = this.getLastPreSale();
+    if (roundList.length == 0) {
+      return {};
+    }
+    const result = [];
+    for (let i = 0; i < roundList.length; i++) {
+      const roundId = roundList[i].id;
+      const conditions = {
+        wallet: wallet,
+        roundId: roundId,
+      };
+      const exchangeList = await this.exchangeRepository.find({
+        conditions: conditions,
+      });
+      const ticket = exchangeList.length;
+      if (roundList[i]?.isPreRef && !_isEmpty(option?.preRefCode)) {
+        const preRefExchangeInfo = await this.getPresaleRefListByUser(wallet, roundId);
+        // method
+        if (!_isEmpty(preRefExchangeInfo)) {
+          const totalPreRefAmount = _sumBy(preRefExchangeInfo, function (e) {
+            return e.preRefAmount;
+          });
+          result[roundId] = {
+            ticket: ticket,
+            historyList: exchangeList,
+            affiliate: {
+              refCode: option.preRefCode,
+              referral: preRefExchangeInfo.length,
+              totalEarned: totalPreRefAmount,
+              refList: preRefExchangeInfo,
+            },
+          };
+        } else {
+          result[roundId] = {
+            ticket: ticket,
+            historyList: exchangeList,
+          };
+        }
+      } else {
+        result[roundId] = {
+          ticket: ticket,
+          historyList: exchangeList,
+        };
+      }
+    }
 
     return result;
   }

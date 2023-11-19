@@ -90,4 +90,9 @@ export const Errors = {
     message: 'The ref code is invalid.',
     status: HttpStatus.NOT_FOUND,
   },
+  REFERRAL_CODE_INVALID_YOURSELF: {
+    code: 'REFERRAL_CODE_INVALID_YOURSELF',
+    message: 'Can not use your own ref code.',
+    status: HttpStatus.NOT_FOUND,
+  },
 };

@@ -4,6 +4,17 @@ import * as paginate from 'mongoose-paginate-v2';
 
 export type NftDocument = HydratedDocument<Nft>;
 
+export const NFT_LEVEL = {
+  NFT_LEVEL_1: 1,
+  NFT_LEVEL_2: 2,
+  NFT_LEVEL_3: 3,
+  NFT_LEVEL_4: 4,
+  NFT_LEVEL_5: 5,
+  NFT_LEVEL_6: 6,
+  NFT_LEVEL_7: 7,
+  NFT_LEVEL_8: 8,
+  NFT_LEVEL_9: 9,
+};
 @Schema({
   timestamps: true,
 })
@@ -12,16 +23,7 @@ export class Nft {
   token: string;
 
   @Prop({ required: true })
-  name: string;
-
-  @Prop({ required: true })
-  description: string;
-
-  @Prop({ required: true })
   level: number;
-
-  @Prop({ required: true })
-  image: string;
 
   @Prop({ required: true })
   owner: string;

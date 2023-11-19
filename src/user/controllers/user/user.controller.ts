@@ -17,7 +17,9 @@ export class UserController {
   async getProfile(@Body() userPreRefDto: UserPreRefDto) {
     const { wallet, preRefCode } = userPreRefDto;
     const userInfo = await this.userService.createUpdateProfile(wallet, { preRefCode: preRefCode });
-    const preRefExchangeInfo = await this.exchangeService.getPresaleRefListByUser(wallet);
-    return { ...userInfo, preRefExchange: preRefExchangeInfo };
+    const summary = await this.exchangeService.getSummaryByUser(wallet, {
+      preRefCode: userInfo.myRefCode,
+    });
+    return { ...userInfo, presale: { ...summary } };
   }
 }
