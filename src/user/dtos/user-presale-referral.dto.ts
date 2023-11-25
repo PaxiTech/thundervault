@@ -10,5 +10,5 @@ export class UserPreRefDto extends CommonDto {
     description: 'referral code',
     example: 'abcdef1234',
   })
-  preRefCode: string;
+  refCode: string;
 }

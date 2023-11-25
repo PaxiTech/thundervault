@@ -15,8 +15,8 @@ export class UserController {
   @ApiOkResponse({ type: UserItemResponse })
   @ApiBadRequestResponse({ type: ErrorResponse })
   async getProfile(@Body() userPreRefDto: UserPreRefDto) {
-    const { wallet, preRefCode } = userPreRefDto;
-    const userInfo = await this.userService.createUpdateProfile(wallet, { preRefCode: preRefCode });
+    const { wallet, refCode } = userPreRefDto;
+    const userInfo = await this.userService.createUpdateProfile(wallet, { refCode: refCode });
     const summary = await this.exchangeService.getSummaryByUser(wallet, {
       preRefCode: userInfo.myRefCode,
     });
