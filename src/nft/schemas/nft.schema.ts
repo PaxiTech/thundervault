@@ -12,6 +12,12 @@ export const NFT_LEVEL = {
   NFT_LEVEL_5: 5,
   NFT_LEVEL_6: 6,
 };
+export const NFT_STATUS = {
+  STORE: 1,
+  WALLET: 2,
+  STAKING: 3,
+  MARKET: 4,
+};
 export const STORE_OWNER = 'store';
 @Schema({
   timestamps: true,
@@ -34,6 +40,9 @@ export class Nft {
 
   @Prop({ required: true, default: false })
   isStaking: boolean;
+
+  @Prop({ required: true, default: NFT_STATUS.STORE })
+  status: number;
 
   @Prop()
   remainEarningTime?: number;
