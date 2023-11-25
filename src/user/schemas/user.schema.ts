@@ -25,13 +25,20 @@ export class User {
   })
   wallet: string;
 
+  //ref code for resale
   @ApiProperty()
   @Prop({ required: false })
   preRefCode: string;
 
+  //my ref code
   @ApiProperty()
   @Prop({ required: false })
   myRefCode: string;
+
+  //ref code normal
+  @ApiProperty()
+  @Prop({ required: false })
+  refCode: string;
 
   @ApiProperty()
   @Prop({

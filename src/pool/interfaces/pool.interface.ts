@@ -1,14 +1,15 @@
 export interface IPool {
-  wallet: string;
+  from: string;
+  to: string; //owner wallet
+  nft: string;
   transactionHash: string;
-  ownerWallet: string;
+  startTime: string;
+  chargeTime?: string;
+  remainEarningTime?: number;
+  price?: number;
+  level?: number;
+}
+export interface IHistoryInterestPool extends IPool {
+  interestTime: string;
   amount: number;
-  price: number;
-  roundId: string;
-  ticketPrice: number;
-  amountForOneTicket: number;
-  poolType: string;
-  amountToken: number;
-  amountTicket: number;
-  createTime: string;
 }

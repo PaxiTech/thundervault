@@ -29,6 +29,18 @@ export class UserService {
     return entity;
   }
 
+  public async addRefCode(wallet: string, refCode: string) {
+    const conditions = { wallet: wallet };
+    const options = { new: true };
+    const entity = await this.userRepository.findOneAndUpdate(
+      conditions,
+      { refCode: refCode },
+      options,
+    );
+
+    return entity;
+  }
+
   public async getUserInfoByPreRefCode(preRefCode: string): Promise<UserItem> {
     //tìm user có myrefcode là prerefcode cua user cần tìm.
     const conditions = { myRefCode: preRefCode };
@@ -56,11 +68,11 @@ export class UserService {
     if (_isEmpty(entity?.myRefCode)) {
       entity = await this.addMyRefCode(wallet);
     }
-    // tương tự sẽ tạo presale referral code sử dụng cho presale.
-    if (_isEmpty(entity?.preRefCode) && !_isEmpty(option?.preRefCode)) {
+    // tạo refCode hoặc preRefCode
+    if (!_isEmpty(option?.refCode) && (_isEmpty(entity?.preRefCode) || _isEmpty(entity?.refCode))) {
       //kiểm tra tính hợp lệ của refCode
       const parentUser = await this.userRepository.findOne({
-        conditions: { myRefCode: option?.preRefCode },
+        conditions: { myRefCode: option?.refCode },
       });
       //không tồn tại mã ref
       if (!parentUser) {
@@ -72,9 +84,10 @@ export class UserService {
         const { code, message, status } = Errors.REFERRAL_CODE_INVALID_YOURSELF;
         throw new AppException(code, message, status);
       }
-      entity = await this.addPreRefCode(wallet, option?.preRefCode);
+      entity = await this.addPreRefCode(wallet, option?.refCode);
+      entity = await this.addRefCode(wallet, option?.refCode);
     }
-    const userInfo = this.populateUserInfo(entity, option);
+    const userInfo = this.populateUserInfo(entity, { getRefCode: true });
     return userInfo;
   }
   public async getUserInfo(wallet: string, option?: any): Promise<any> {
@@ -102,11 +115,12 @@ export class UserService {
       wallet: user.wallet,
       myRefCode: _get(user, 'myRefCode', ''),
       preRefCode: _get(user, 'preRefCode', ''),
+      refCode: _get(user, 'refCode', ''),
       level: user?.level || 0,
       createdAt: _get(user, 'createdAt'),
       updatedAt: _get(user, 'updatedAt'),
     };
-    if (options?.getMyRefCode) {
+    if (options?.getRefCode) {
       const myRefCode = {
         refLevel1: user.refLevel1,
         refLevel2: user.refLevel2,
@@ -179,7 +193,7 @@ export class UserService {
   }
 
   public async processMyRefCode(wallet: string, parentWallet: string): Promise<UserItem> {
-    const parentUserInfo = await this.getUserInfo(parentWallet, { getMyRefCode: true });
+    const parentUserInfo = await this.getUserInfo(parentWallet, { getRefCode: true });
     const conditions = { wallet: wallet };
     const options = { new: true };
     //set referral code from referral code of parent
@@ -207,6 +221,18 @@ export class UserService {
       throw new AppException(code, message, status);
     }
     const userInfo = this.populateUserInfo(entity);
+    return userInfo;
+  }
+
+  public async updateUserLevel(wallet: string, level: number) {
+    let userInfo = await this.getUserInfo(wallet);
+    const userLevel = userInfo.level;
+    if (userLevel < level) {
+      const conditions = { wallet: wallet };
+      const options = { new: true };
+      userInfo = await this.userRepository.findOneAndUpdate(conditions, { level: level }, options);
+    }
+
     return userInfo;
   }
 }

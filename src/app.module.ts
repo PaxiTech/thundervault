@@ -11,6 +11,7 @@ import { ExchangeModule } from './exchange/exchange.module';
 import { NftModule } from './nft/nft.module';
 // import { PoolModule } from './pool/pool.module';
 import { UserModule } from './user/user.module';
+import { StoreModule } from './store/store.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { UserModule } from './user/user.module';
     // PoolModule,
     NftModule,
     CommandModule,
+    StoreModule,
   ],
   controllers: [],
 })

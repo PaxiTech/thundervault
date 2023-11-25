@@ -11,14 +11,6 @@ export type PoolDocument = HydratedDocument<Pool>;
 export class Pool {
   @ApiProperty()
   @Prop()
-  nft: string;
-
-  @ApiProperty()
-  @Prop()
-  level: string;
-
-  @ApiProperty()
-  @Prop()
   from: string;
 
   @ApiProperty()
@@ -27,7 +19,31 @@ export class Pool {
 
   @ApiProperty()
   @Prop()
-  remainTime: string;
+  nft: string;
+
+  @ApiProperty()
+  @Prop()
+  transactionHash: string;
+
+  @ApiProperty()
+  @Prop()
+  startTime: string;
+
+  @ApiProperty()
+  @Prop()
+  chargeTime?: string;
+
+  @ApiProperty()
+  @Prop()
+  level: number;
+
+  @ApiProperty()
+  @Prop()
+  price: number;
+
+  @ApiProperty()
+  @Prop()
+  remainEarningTime: string;
 }
 
 export const PoolSchema = SchemaFactory.createForClass(Pool);

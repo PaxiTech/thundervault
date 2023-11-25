@@ -3,7 +3,7 @@ import { IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
 export class StakingDto {
   @ApiProperty()
   @IsNotEmpty()
-  token: string;
+  nft: string;
 
   @ApiProperty()
   @IsOptional()

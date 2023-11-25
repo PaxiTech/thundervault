@@ -11,10 +11,8 @@ export const NFT_LEVEL = {
   NFT_LEVEL_4: 4,
   NFT_LEVEL_5: 5,
   NFT_LEVEL_6: 6,
-  NFT_LEVEL_7: 7,
-  NFT_LEVEL_8: 8,
-  NFT_LEVEL_9: 9,
 };
+export const STORE_OWNER = 'store';
 @Schema({
   timestamps: true,
 })
@@ -22,15 +20,23 @@ export class Nft {
   @Prop({ required: [true, 'token is unique'], unique: true })
   token: string;
 
+  @Prop({ required: true, default: STORE_OWNER })
+  owner: string; // default store
+
   @Prop({ required: true })
   level: number;
 
   @Prop({ required: true })
-  owner: string;
+  price: number;
 
   @Prop({ required: true })
-  @Prop()
   earningTime: number;
+
+  @Prop({ required: true, default: false })
+  isStaking: boolean;
+
+  @Prop()
+  remainEarningTime?: number;
 }
 
 export const NftSchema = SchemaFactory.createForClass(Nft);

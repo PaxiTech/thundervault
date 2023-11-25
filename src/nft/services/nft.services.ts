@@ -11,22 +11,33 @@ import { ethers } from 'ethers';
 import * as fs from 'fs';
 import { get as _get } from 'lodash';
 import { metaDataSimple } from '@src/nft/contracts/meta-data';
+import { STORE_OWNER } from '@src/nft/schemas/nft.schema';
+import { StoreListDto } from '@src/store/dtos/list.dto';
 
 @Injectable()
 export class NftService {
   constructor(private nftRepository: NftRepository, private configService: ConfigService) {}
 
-  public async generateNft(data): Promise<any> {
-    const { owner, token, level, metaData } = data;
-    //lưu nft master
-    const nftEntity = await this.nftRepository.create({
-      token: token,
-      owner: owner,
-      level: level,
-    });
-    // tạo file json cho nft
-    this.saveNFTAsJson(token, metaData);
-    return nftEntity;
+  public async generateNft(token: string, level: number): Promise<any> {
+    const nftInfo = await this.getNftInfo(token, false);
+    const metaData = this.getMetadata(level);
+    if (nftInfo) {
+      return nftInfo;
+    } else {
+      //lưu nft master
+      // const nftOwnerWallet = this.configService.get<string>('nftOwnerWallet');
+      const nftEntity = await this.nftRepository.create({
+        token: token,
+        owner: STORE_OWNER,
+        level: level,
+        price: metaData.price,
+        earningTime: metaData.earningTime,
+      });
+      // tạo file json cho nft
+      this.saveNFTAsJson(token, metaData);
+      const createNftInfo = this.populateNftInfo(nftEntity);
+      return createNftInfo;
+    }
   }
 
   /**
@@ -55,10 +66,13 @@ export class NftService {
     const filesDestination = this.configService.get('nft_resource');
 
     const nftPath = `${filesDestination}${token}.json`;
-    fs.writeFileSync(nftPath, nftJson);
+    //nếu chưa tồn tại file thì tạo file
+    if (!fs.existsSync(nftPath)) {
+      fs.writeFileSync(nftPath, nftJson);
+    }
   }
 
-  public async getNftInfo(token: string): Promise<any> {
+  public async getNftInfo(token: string, throwError = true): Promise<any> {
     const conditions = {
       token: token,
     };
@@ -66,8 +80,12 @@ export class NftService {
       conditions: conditions,
     });
     if (!entity) {
-      const { code, message, status } = Errors.NFT_NOT_EXIST;
-      throw new AppException(code, message, status);
+      if (throwError) {
+        const { code, message, status } = Errors.NFT_NOT_EXIST;
+        throw new AppException(code, message, status);
+      } else {
+        return null;
+      }
     }
     const nftInfo = this.populateNftInfo(entity);
     return nftInfo;
@@ -84,15 +102,29 @@ export class NftService {
    * @returns
    */
   public populateNftInfo(nft: NftDocument) {
+    const metaData = this.getMetadata(nft.level);
     const data = {
       _id: _get(nft, '_id'),
       token: nft.token,
       owner: nft.owner,
       level: nft.level,
+      price: nft.price,
+      metaData: metaData,
       // earningTime: nft.earningTime,
       createdAt: _get(nft, 'createdAt'),
       updatedAt: _get(nft, 'updatedAt'),
     };
     return data;
+  }
+
+  async getStoreList(storeListDto: StoreListDto) {
+    const nftStoreList = await this.nftRepository.getStoreNft();
+    const result = new NftListItem();
+    const list = nftStoreList.map((item) => {
+      return this.populateNftInfo(item?.nft);
+    });
+
+    result.docs = list;
+    return { ...result };
   }
 }
