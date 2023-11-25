@@ -13,6 +13,7 @@ import { get as _get } from 'lodash';
 import { metaDataSimple } from '@src/nft/contracts/meta-data';
 import { STORE_OWNER } from '@src/nft/schemas/nft.schema';
 import { StoreListDto } from '@src/store/dtos/list.dto';
+import { NFT_STATUS } from '@src/nft/schemas/nft.schema';
 
 @Injectable()
 export class NftService {
@@ -126,5 +127,41 @@ export class NftService {
 
     result.docs = list;
     return { ...result };
+  }
+  /**
+   *
+   * @param paginationParam
+   * @returns
+   */
+  async getListNftByStatus(
+    status: number,
+    storeListDto: StoreListDto,
+    paginationParam: PaginateDto,
+  ) {
+    let keywordConds: Record<any, any> = {};
+    let conditions = { status: status };
+
+    if (storeListDto.keyword) {
+      keywordConds = {
+        $or: [
+          // { name: { $regex: params.keyword, $options: 'i' } },
+          // { 'table.name': { $regex: storeListDto.keyword, $options: 'i' } },
+        ],
+      };
+    }
+
+    conditions = { ...keywordConds, ...conditions };
+    const nftList = await this.nftRepository.pagination({
+      conditions: conditions,
+      ...paginationParam,
+    });
+    const { docs = [], ...pagination } = nftList;
+    const result = new NftListItem();
+    const list = docs.map((item) => {
+      return this.populateNftInfo(item);
+    });
+
+    result.docs = list;
+    return { ...result, ...pagination };
   }
 }
