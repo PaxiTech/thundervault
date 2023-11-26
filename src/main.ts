@@ -7,7 +7,7 @@ import { TransformInterceptor } from '@src/common/interceptors/transform.interce
 import { AppLogger } from '@src/common/services/app-logger.service';
 import { ValidationPipe } from '@nestjs/common';
 import { join } from 'path';
-// import * as mongoose from 'mongoose';
+import * as mongoose from 'mongoose';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true,
@@ -16,7 +16,7 @@ async function bootstrap() {
     index: false,
     prefix: '/asset',
   });
-  // mongoose.set('debug', true);
+  mongoose.set('debug', true);
   const logger = app.get(AppLogger);
   app.useLogger(logger);
   app.enableCors({

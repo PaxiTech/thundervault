@@ -5,11 +5,16 @@ import { UserService } from '@src/user/services/user.services';
 import { UserItemResponse } from '@src/user/dtos/user-response.dto';
 import { UserPreRefDto } from '@src/user/dtos/user-presale-referral.dto';
 import { ExchangeService } from '@src/exchange/services/exchange.services';
+import { NftService } from '@src/nft/services/nft.services';
 
 @ApiTags('User')
 @Controller('user')
 export class UserController {
-  constructor(private userService: UserService, private exchangeService: ExchangeService) {}
+  constructor(
+    private userService: UserService,
+    private exchangeService: ExchangeService,
+    private nftService: NftService,
+  ) {}
 
   @Post('profile')
   @ApiOkResponse({ type: UserItemResponse })
@@ -17,9 +22,10 @@ export class UserController {
   async getProfile(@Body() userPreRefDto: UserPreRefDto) {
     const { wallet, refCode } = userPreRefDto;
     const userInfo = await this.userService.createUpdateProfile(wallet, { refCode: refCode });
+    const myNft = await this.nftService.getNftByUser(wallet);
     const summary = await this.exchangeService.getSummaryByUser(wallet, {
       preRefCode: userInfo.myRefCode,
     });
-    return { ...userInfo, presale: { ...summary } };
+    return { ...userInfo, presale: { ...summary }, nft: myNft };
   }
 }

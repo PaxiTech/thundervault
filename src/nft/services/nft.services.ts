@@ -3,17 +3,15 @@ import { ConfigService } from '@nestjs/config';
 import { Errors } from '@src/common/contracts/error';
 import { PaginateDto } from '@src/common/dtos/paginate.dto';
 import { AppException } from '@src/common/exceptions/app.exception';
+import { metaDataSimple } from '@src/nft/contracts/meta-data';
 import { FilterNftListDto } from '@src/nft/dtos/list.dto';
-import { NftItem, NftListItem } from '@src/nft/dtos/nft-response.dto';
+import { NftListItem } from '@src/nft/dtos/nft-response.dto';
 import { NftRepository } from '@src/nft/repositories/nft.repository';
-import { NftDocument } from '@src/nft/schemas/nft.schema';
-import { ethers } from 'ethers';
+import { NFT_ACTION, NFT_STATUS, NftDocument, STORE_OWNER } from '@src/nft/schemas/nft.schema';
+import { StoreListDto } from '@src/store/dtos/list.dto';
 import * as fs from 'fs';
 import { get as _get } from 'lodash';
-import { metaDataSimple } from '@src/nft/contracts/meta-data';
-import { STORE_OWNER } from '@src/nft/schemas/nft.schema';
-import { StoreListDto } from '@src/store/dtos/list.dto';
-import { NFT_STATUS } from '@src/nft/schemas/nft.schema';
+import { ActionDto } from '../dtos/action.dto';
 
 @Injectable()
 export class NftService {
@@ -110,6 +108,7 @@ export class NftService {
       owner: nft.owner,
       level: nft.level,
       price: nft.price,
+      status: nft.status,
       metaData: metaData,
       // earningTime: nft.earningTime,
       createdAt: _get(nft, 'createdAt'),
@@ -163,5 +162,123 @@ export class NftService {
 
     result.docs = list;
     return { ...result, ...pagination };
+  }
+
+  public async actionStaking(actionDto: ActionDto) {
+    const stakingOwnerWallet = this.configService.get<string>('stakingOwnerWallet');
+    const { fromWallet, nft, action } = actionDto;
+    let nftInfo = await this.getNftInfo(nft);
+    let isValidAction = false;
+    //staking action
+    if (
+      action === NFT_ACTION.staking &&
+      nftInfo.status === NFT_STATUS.WALLET &&
+      nftInfo.owner === fromWallet
+    ) {
+      isValidAction = true;
+    }
+    if (!isValidAction) {
+      const { code, message, status } = Errors.INVALID_STAKING_OWNER_NFT;
+      throw new AppException(code, message, status);
+    }
+    if (nftInfo && isValidAction) {
+      const conditions = { token: nft };
+      const dataUpdate = {
+        owner: stakingOwnerWallet,
+        preOwner: nftInfo.owner,
+        status: NFT_STATUS.STAKING,
+      };
+      const options = { new: true };
+      nftInfo = await this.nftRepository.findOneAndUpdate(conditions, dataUpdate, options);
+      return this.populateNftInfo(nftInfo);
+    }
+  }
+
+  public async addToMarket(actionDto: ActionDto) {
+    const marketOwnerWallet = this.configService.get<string>('marketOwnerWallet');
+    const { fromWallet, nft, action } = actionDto;
+    let nftInfo = await this.getNftInfo(nft);
+    let isValidAction = false;
+    //staking action
+    if (
+      action === NFT_ACTION.market &&
+      nftInfo.status === NFT_STATUS.WALLET &&
+      nftInfo.owner === fromWallet
+    ) {
+      isValidAction = true;
+    }
+    if (!isValidAction) {
+      const { code, message, status } = Errors.INVALID_STAKING_OWNER_NFT;
+      throw new AppException(code, message, status);
+    }
+    if (nftInfo && isValidAction) {
+      const conditions = { token: nft };
+      const dataUpdate = {
+        owner: marketOwnerWallet,
+        preOwner: nftInfo.owner,
+        status: NFT_STATUS.MARKET,
+      };
+      const options = { new: true };
+      nftInfo = await this.nftRepository.findOneAndUpdate(conditions, dataUpdate, options);
+      return this.populateNftInfo(nftInfo);
+    }
+  }
+
+  public async buyNftFromStore(actionDto: ActionDto) {
+    const { fromWallet, nft, action } = actionDto;
+    let nftInfo = await this.getNftInfo(nft);
+    //check action
+    let isValidAction = false;
+    //buy action, action : buy from store, current status store => update status wallet
+    if (
+      action === NFT_ACTION.buy &&
+      nftInfo.status === NFT_STATUS.STORE &&
+      nftInfo.owner === STORE_OWNER
+    ) {
+      isValidAction = true;
+    }
+    if (!isValidAction) {
+      const { code, message, status } = Errors.INVALID_BUY_NFT;
+      throw new AppException(code, message, status);
+    }
+    if (nftInfo && isValidAction) {
+      const conditions = { token: nft };
+      const dataUpdate = { owner: fromWallet, preOwner: '', status: NFT_STATUS.WALLET };
+      const options = { new: true };
+      nftInfo = await this.nftRepository.findOneAndUpdate(conditions, dataUpdate, options);
+      return this.populateNftInfo(nftInfo);
+    }
+  }
+
+  public async buyNftFromMarket(actionDto: ActionDto) {
+    const { fromWallet, nft, action } = actionDto;
+    let nftInfo = await this.getNftInfo(nft);
+    //check action
+    let isValidAction = false;
+    //buy action, action : buy from store, current status store => update status wallet
+    //buy action, action : buy from market, current status market => update status wallet
+    if (action === NFT_ACTION.buy && nftInfo.status === NFT_STATUS.MARKET) {
+      isValidAction = true;
+    }
+    if (!isValidAction) {
+      const { code, message, status } = Errors.INVALID_BUY_NFT;
+      throw new AppException(code, message, status);
+    }
+    if (nftInfo && isValidAction) {
+      const conditions = { token: nft };
+      const dataUpdate = { owner: fromWallet, preOwner: '', status: NFT_STATUS.WALLET };
+      const options = { new: true };
+      nftInfo = await this.nftRepository.findOneAndUpdate(conditions, dataUpdate, options);
+      return this.populateNftInfo(nftInfo);
+    }
+  }
+
+  async getNftByUser(wallet: string) {
+    const conditions = { owner: wallet };
+    const nftList = await this.nftRepository.find({ conditions: conditions });
+    const list = nftList.map((item) => {
+      return this.populateNftInfo(item);
+    });
+    return list;
   }
 }
