@@ -95,4 +95,14 @@ export const Errors = {
     message: 'Can not use your own ref code.',
     status: HttpStatus.NOT_FOUND,
   },
+  INVALID_BUY_NFT: {
+    code: 'INVALID_BUY_NFT',
+    message: 'Invalid buy nft',
+    status: HttpStatus.NOT_FOUND,
+  },
+  INVALID_STAKING_OWNER_NFT: {
+    code: 'INVALID_STAKING_OWNER_NFT',
+    message: 'Invalid owner nft',
+    status: HttpStatus.NOT_FOUND,
+  },
 };
