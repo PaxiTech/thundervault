@@ -24,7 +24,7 @@ export class MarketController {
   @ApiOkResponse({ type: MarketListResponse })
   @ApiBadRequestResponse({ type: ErrorResponse })
   @ApiQuery({ type: PaginateDto })
-  async getQRcodeByRestaurant(
+  async getNftMarketList(
     @pagination() paginationParam: PaginateDto,
     @Body() marketListDto: MarketListDto,
   ) {
