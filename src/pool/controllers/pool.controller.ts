@@ -17,6 +17,7 @@ import { pagination } from '@src/common/decorators/pagination';
 import { FilterNftListDto } from '@src/nft/dtos/list.dto';
 import { NftService } from '@src/nft/services/nft.services';
 import { NFT_STATUS } from '@src/nft/schemas/nft.schema';
+import { CommonDto } from '@src/common/dtos/common.dto';
 @ApiTags('Pool')
 @Controller('pool')
 export class PoolController {
@@ -35,13 +36,11 @@ export class PoolController {
   @ApiOkResponse({ type: NftListResponse })
   @ApiBadRequestResponse({ type: ErrorResponse })
   @ApiQuery({ type: PaginateDto })
-  async getNftNftList(
-    @pagination() paginationParam: PaginateDto,
-    @Body() nftListDto: FilterNftListDto,
-  ) {
-    const result = await this.nftService.getListNftByStatus(
+  async getUserNftPool(@pagination() paginationParam: PaginateDto, @Body() commonDto: CommonDto) {
+    const { wallet } = commonDto;
+    const result = await this.nftService.getUserNftPool(
+      wallet,
       NFT_STATUS.STAKING,
-      nftListDto,
       paginationParam,
     );
     return result;

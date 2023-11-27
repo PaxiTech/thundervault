@@ -127,6 +127,21 @@ export class NftService {
     result.docs = list;
     return { ...result };
   }
+  async getUserNftPool(wallet: string, status: number, paginationParam: PaginateDto) {
+    const conditions = { owner: wallet, status: status };
+    const nftList = await this.nftRepository.pagination({
+      conditions: conditions,
+      ...paginationParam,
+    });
+    const { docs = [], ...pagination } = nftList;
+    const result = new NftListItem();
+    const list = docs.map((item) => {
+      return this.populateNftInfo(item);
+    });
+
+    result.docs = list;
+    return { ...result, ...pagination };
+  }
   /**
    *
    * @param paginationParam
