@@ -10,6 +10,8 @@ export class BlockchainService {
   ownerWallet: string;
   ownerNftWallet: string;
   nftAddress: string;
+  tdvAddress: string;
+  usdtAddress = '0x55d398326f99059fF775485246999027B3197955';
   abiTransferEvent = ['event Transfer(address indexed from, address indexed to, uint amount)'];
   abiNft = [
     'function getTokenLevel(uint256) public view returns (uint256)',
@@ -25,18 +27,26 @@ export class BlockchainService {
     this.ownerWallet = this.configService.get<string>('ownerWallet');
     this.ownerNftWallet = this.configService.get<string>('ownerNftWallet');
     this.nftAddress = this.configService.get<string>('nftAddress');
+    this.tdvAddress = this.configService.get<string>('tdvAddress');
     this.providerAnkr = ethers.getDefaultProvider(
       'https://rpc.ankr.com/bsc/5604b43661ba48f6ab7ef4b9970d5cd9b4fdb42357944ed24ca44374d640c604',
     );
 
+    // mainnet
+    this.providerBsc = ethers.getDefaultProvider(
+      'https://bsc-dataseed.binance.org/',
+    );
     // testnet
-    this.providerBsc = ethers.getDefaultProvider('https://data-seed-prebsc-1-s1.binance.org:8545');
+    // this.providerBsc = ethers.getDefaultProvider(
+    //   'https://data-seed-prebsc-1-s1.binance.org:8545/',
+    // );
     // this.savePresave();
-    this.onMintNft();
+    // this.onMintNft();
+    this.getRateTokenUsdt();
   }
   async savePresave() {
     const contract = new Contract(
-      '0x55d398326f99059fF775485246999027B3197955',
+      this.usdtAddress,
       this.abiTransferEvent,
       this.providerAnkr,
     );
@@ -93,6 +103,22 @@ export class BlockchainService {
       }
     });
   }
+
+  async getRateTokenUsdt() {
+    const pancakeRouterAddress = '0x10ED43C718714eb63d5aA57B78B54704E256024E';
+    const pancakeRouterAbi = [
+      'function getAmountsOut(uint256 amountIn, address[] memory path) internal view returns (uint256[] memory amounts)',
+    ];
+    const pancakeRouterContract = new ethers.Contract(pancakeRouterAddress, pancakeRouterAbi, this.providerAnkr);
+
+    const amountIn = ethers.parseUnits('1');
+    const path = [this.usdtAddress, this.tdvAddress];
+    const amounts = await pancakeRouterContract.getAmountsOut(amountIn, path);
+    const rate = formatEther(amounts[1]);
+
+    return rate;
+  }
+
   // async staking() {
   //   const mintNftAbi = [
   //     'event Transfer(address indexed from,address indexed to, address indexed token, unit price)',
