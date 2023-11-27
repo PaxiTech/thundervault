@@ -32,17 +32,4 @@ export class PoolController {
     //const result = await this.poolService.staking(stakingDto);
     //return result;
   }
-  @Post('')
-  @ApiOkResponse({ type: NftListResponse })
-  @ApiBadRequestResponse({ type: ErrorResponse })
-  @ApiQuery({ type: PaginateDto })
-  async getUserNftPool(@pagination() paginationParam: PaginateDto, @Body() commonDto: CommonDto) {
-    const { wallet } = commonDto;
-    const result = await this.nftService.getUserNftPool(
-      wallet,
-      NFT_STATUS.STAKING,
-      paginationParam,
-    );
-    return result;
-  }
 }

@@ -127,8 +127,11 @@ export class NftService {
     result.docs = list;
     return { ...result };
   }
-  async getUserNftPool(wallet: string, status: number, paginationParam: PaginateDto) {
-    const conditions = { owner: wallet, status: status };
+  async getListNftByUser(wallet: string, status: number, paginationParam: PaginateDto) {
+    const conditions = { owner: wallet };
+    if (status) {
+      conditions['status'] = status;
+    }
     const nftList = await this.nftRepository.pagination({
       conditions: conditions,
       ...paginationParam,
