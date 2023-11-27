@@ -31,17 +31,17 @@ async function bootstrap() {
     }),
   );
   app.useGlobalInterceptors(new TransformInterceptor());
-
-  const configSwagger = new DocumentBuilder()
-    .setTitle('Paxi presale')
-    .setDescription('The Paxi presale API ')
-    .setVersion('1.0')
-    .addServer(process.env.SWAGGER_API_URL || 'http://localhost:5000')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, configSwagger);
-  SwaggerModule.setup('api-docs', app, document);
-
+  if (process.env.NODE_ENV !== 'production') {
+    const configSwagger = new DocumentBuilder()
+      .setTitle('Paxi presale')
+      .setDescription('The Paxi presale API ')
+      .setVersion('1.0')
+      .addServer(process.env.SWAGGER_API_URL || 'http://localhost:5000')
+      .addBearerAuth()
+      .build();
+    const document = SwaggerModule.createDocument(app, configSwagger);
+    SwaggerModule.setup('api-docs', app, document);
+  }
   await app.listen(process.env.PORT || 5000);
 }
 bootstrap();
