@@ -29,6 +29,6 @@ export class ActionDto {
   status: NFT_STATUS;
 
   @ApiProperty({ enum: NFT_ACTION })
-  @IsNotEmpty()
+  @IsOptional()
   action: NFT_ACTION;
 }
