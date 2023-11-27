@@ -25,14 +25,14 @@ export class BlockchainService {
     this.ownerWallet = this.configService.get<string>('ownerWallet');
     this.ownerNftWallet = this.configService.get<string>('ownerNftWallet');
     this.nftAddress = this.configService.get<string>('nftAddress');
-    // this.providerAnkr = ethers.getDefaultProvider(
-    //   'https://rpc.ankr.com/bsc/5604b43661ba48f6ab7ef4b9970d5cd9b4fdb42357944ed24ca44374d640c604',
-    // );
+    this.providerAnkr = ethers.getDefaultProvider(
+      'https://rpc.ankr.com/bsc/5604b43661ba48f6ab7ef4b9970d5cd9b4fdb42357944ed24ca44374d640c604',
+    );
 
     // testnet
     this.providerBsc = ethers.getDefaultProvider('https://data-seed-prebsc-1-s1.binance.org:8545');
     // this.savePresave();
-    // this.onMintNft();
+    this.onMintNft();
   }
   async savePresave() {
     const contract = new Contract(
@@ -75,16 +75,19 @@ export class BlockchainService {
   }
 
   async onMintNft() {
-    const contract = new Contract(this.nftAddress, this.abiNft, this.providerAnkr);
+    console.log("nft address", this.nftAddress);
+
+    const contract = new Contract(this.nftAddress, this.abiNft, this.providerBsc);
 
     // because Ankr provider limit call
     const contractBsc = new Contract(this.nftAddress, this.abiNft, this.providerBsc);
     contract.on('Transfer', (from, to: string, tokenId, event) => {
-      if (to == this.ownerNftWallet) {
+
+      if (to.toLowerCase() == this.ownerNftWallet.toLowerCase() && from.toLowerCase() == '0x0000000000000000000000000000000000000000') {
         contractBsc
           .getFunction('getTokenLevel')(tokenId)
           .then((level) => {
-            // save new nft
+            // TODO: save new nft
             // /nft/{level}/{tokenId}.json
           });
       }
