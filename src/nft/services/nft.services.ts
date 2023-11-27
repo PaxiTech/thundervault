@@ -182,7 +182,7 @@ export class NftService {
     return { ...result, ...pagination };
   }
 
-  public async actionStaking(actionDto: ActionDto) {
+  public async stakingNft(actionDto: ActionDto) {
     const stakingOwnerWallet = this.configService.get<string>('stakingOwnerWallet');
     const { fromWallet, nft, action } = actionDto;
     let nftInfo = await this.getNftInfo(nft);
@@ -212,7 +212,7 @@ export class NftService {
     }
   }
 
-  public async addToMarket(actionDto: ActionDto) {
+  public async addNftToMarket(actionDto: ActionDto) {
     const marketOwnerWallet = this.configService.get<string>('marketOwnerWallet');
     const { fromWallet, nft, action } = actionDto;
     let nftInfo = await this.getNftInfo(nft);

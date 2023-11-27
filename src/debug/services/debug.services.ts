@@ -7,11 +7,11 @@ export class DebugService {
   constructor(private nftService: NftService) {}
 
   public async addNftToMarket(actionDto: ActionDto) {
-    return await this.nftService.addToMarket(actionDto);
+    return await this.nftService.addNftToMarket(actionDto);
   }
 
   public async stakingNft(actionDto: ActionDto) {
-    return await this.nftService.actionStaking(actionDto);
+    return await this.nftService.stakingNft(actionDto);
   }
 
   public async buyNftFromStore(actionDto: ActionDto) {
