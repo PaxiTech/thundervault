@@ -12,10 +12,16 @@ import { StoreListDto } from '@src/store/dtos/list.dto';
 import * as fs from 'fs';
 import { get as _get } from 'lodash';
 import { ActionDto } from '../dtos/action.dto';
+import { CommissionFeeRepository } from '../repositories/commissionfee.repository';
+import { CommissionFeeDocument } from '../schemas/commissionfee.schema';
 
 @Injectable()
 export class NftService {
-  constructor(private nftRepository: NftRepository, private configService: ConfigService) {}
+  constructor(
+    private nftRepository: NftRepository,
+    private commissionFeeRepository: CommissionFeeRepository,
+    private configService: ConfigService,
+  ) {}
 
   public async generateNft(token: string, level: number): Promise<any> {
     const nftInfo = await this.getNftInfo(token, false);
@@ -298,5 +304,26 @@ export class NftService {
       return this.populateNftInfo(item);
     });
     return list;
+  }
+
+  //tổng số tiền tối đa user có thể nhân là 4 lần tổng giá trị nft mà user đó đang staking
+  public async getMaxValueStakingByUser(wallet: string) {
+    const totalAmount = await this.nftRepository.getTotalNftStakingByUser(wallet);
+    return totalAmount * 4; // 4 lần tổng giá trị staking
+  }
+
+  public async getCurrentTotalCommissionFeeByUser(wallet: string) {
+    return await this.commissionFeeRepository.getTotalCommissionFeeStakingByUser(wallet);
+  }
+
+  public async getAvailableCommissionFeeByUser(wallet: string) {
+    const totalCommissionFee = await this.getCurrentTotalCommissionFeeByUser(wallet);
+    const maxCommissionFee = await this.getMaxValueStakingByUser(wallet);
+    return maxCommissionFee - totalCommissionFee;
+  }
+
+  //history get commission fee
+  public async createCommissionFee(data) {
+    return await this.commissionFeeRepository.create(data);
   }
 }

@@ -47,9 +47,6 @@ export class Nft {
   @Prop({ required: true })
   earningTime: number;
 
-  @Prop({ required: true, default: false })
-  isStaking: boolean;
-
   @Prop({ required: true, default: NFT_STATUS.STORE })
   status: number;
 
