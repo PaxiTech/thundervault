@@ -16,6 +16,9 @@ export class BlockchainService {
   abiNft = [
     'function getTokenLevel(uint256) public view returns (uint256)',
     'event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)',
+    'event Staked(uint256 indexed tokenId, address indexed address)',
+    'event Unstaked(uint256 indexed tokenId, address indexed address)',
+    'function getStakeInfo(uint256 tokenId) public view returns (address owner, uint256 startTime, uint256 stakedDays)',
   ];
   providerAnkr;
   providerBsc;
@@ -41,7 +44,7 @@ export class BlockchainService {
     //   'https://data-seed-prebsc-1-s1.binance.org:8545/',
     // );
     // this.savePresave();
-    // this.onMintNft();
+    // this.onWatchNft();
     this.getRateTokenUsdt();
   }
   async savePresave() {
@@ -84,7 +87,7 @@ export class BlockchainService {
     });
   }
 
-  async onMintNft() {
+  async onWatchNft() {
     console.log("nft address", this.nftAddress);
 
     const contract = new Contract(this.nftAddress, this.abiNft, this.providerBsc);
@@ -93,6 +96,7 @@ export class BlockchainService {
     const contractBsc = new Contract(this.nftAddress, this.abiNft, this.providerBsc);
     contract.on('Transfer', (from, to: string, tokenId, event) => {
 
+      // has minted
       if (to.toLowerCase() == this.ownerNftWallet.toLowerCase() && from.toLowerCase() == '0x0000000000000000000000000000000000000000') {
         contractBsc
           .getFunction('getTokenLevel')(tokenId)
@@ -101,6 +105,25 @@ export class BlockchainService {
             // /nft/{level}/{tokenId}.json
           });
       }
+      // has burned
+      else if (to.toLowerCase() == '0x0000000000000000000000000000000000000000') {
+
+      }
+
+      //TODO: update nft owner = to
+    });
+
+    contract.on('Staked', (tokenId, address, event) => {
+      contract.getStakeInfo(tokenId).then((info) => {
+        const owner = info[0];
+        const startTime = info[1];
+        const stakedDays = info[2];
+
+        //TODO: update nft staked
+      });
+      contract.on('Unstaked', (tokenId, address, event) => {
+        //TODO: update nft unstaked
+      });
     });
   }
 
