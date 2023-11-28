@@ -13,6 +13,7 @@ export default () => ({
   stakingOwnerWallet: process.env.STAKINGOWNERWALLET || '',
   marketOwnerWallet: process.env.MARKETOWNERWALLET || '',
   nftAddress: process.env.NFT_ADDRESS || '',
+  tdvAddress: process.env.TDV_ADDRESS || '',
   configSecretKey:
     process.env.SECRET_KEY || 'nJVvIsM2KJY4HRQVL1lwZ5gBHo3TAcz/GHOWJaN90HhOyN2a7rCPI9iJqyU=',
   nft_resource: process.env.NFT_RESOURCE || './asset/resource/',
