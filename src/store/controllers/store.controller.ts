@@ -13,11 +13,12 @@ import { StoreListResponse } from '@src/store/dtos/store-response.dto';
 import { StoreListDto } from '@src/store/dtos/list.dto';
 import { StoreService } from '@src/store/services/store.services';
 import { NftService } from '@src/nft/services/nft.services';
+import { BlockchainService } from '@src/blockchain/blockchain.service';
 
 @ApiTags('Store')
 @Controller('store')
 export class StoreController {
-  constructor(private storeService: StoreService, private nftService: NftService) {}
+  constructor(private storeService: StoreService, private nftService: NftService, private blockchainService: BlockchainService) { }
 
   @Post('')
   @ApiOkResponse({ type: StoreListResponse })
@@ -25,5 +26,12 @@ export class StoreController {
   async getStoreHistory(@Body() storeListDto: StoreListDto) {
     const result = await this.nftService.getStoreList(storeListDto);
     return result;
+  }
+
+  async buyNft(@Request() req, @Body() body) {
+    const { address, level } = body;
+    const rate = await this.blockchainService.getRateTokenUsdt();
+    // TODO: calc nft price = nft price usdt * rate
+    // TODO: cache address and price
   }
 }
