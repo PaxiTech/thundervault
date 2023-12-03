@@ -13,6 +13,6 @@ export class UtilHelperService {
       : moment().format('YYYY-MM-DD HH:mm:ss');
   }
   public calculateEarningValue(price: number, currentBrokerageFeeStaking: any) {
-    return 0;
+    return price * currentBrokerageFeeStaking;
   }
 }

@@ -59,7 +59,7 @@ export class PoolService {
   }
 
   public async processReferralStaking(stakingData: IPool, UserInfo: UserItem) {
-    const { from, nft } = stakingData;
+    const { from, nft, price } = stakingData;
     const tokenLevel = stakingData.level;
     const wallet = UserInfo.wallet;
     //update user level if sử dụng user level = nft level
@@ -79,21 +79,29 @@ export class PoolService {
     if (refLevel1) {
       //lấy thông tin F1
       const userF1 = await this.userService.getUserInfo(refLevel1);
-      // kiểm tra điều kiện có ít nhất 5 F1 staking và có 3 F1 hạng thấp hơn 1 bậc.
-      const isValidStakingF1 = await this.validateStaking(userF1.wallet, userF1.level);
-      if (isValidStakingF1) {
-        const currentBrokerageFeeStaking = brokerageFeeStaking['F1'];
-        const earningValue = this.helperService.calculateEarningValue(
-          stakingData.price,
-          currentBrokerageFeeStaking,
-        );
-        const poolStakingData = {
-          from: from,
-          nft: nft,
-          refLevel: 1,
-          earningValue: earningValue,
-        };
-        const poolStakingEntiy = await this.poolStakingRepository.create(poolStakingData);
+      const maxValueCommissionFeeAvailable = await this.nftService.getAvailableCommissionFeeByUser(
+        userF1.wallet,
+      );
+      // chỉ xử lý khi còn có thể nhận được commission fee
+      if (maxValueCommissionFeeAvailable > 0) {
+        // kiểm tra điều kiện có ít nhất 5 F1 staking và có 3 F1 hạng thấp hơn 1 bậc.
+        const isValidStakingF1 = await this.validateStaking(userF1.wallet, userF1.level);
+        if (isValidStakingF1) {
+          const currentBrokerageFeeStaking = brokerageFeeStaking['F1'][userF1.level];
+          const earningValue = this.helperService.calculateEarningValue(
+            stakingData.price,
+            currentBrokerageFeeStaking,
+          );
+          const commissionFee = {
+            from: from,
+            owner: userF1.wallet,
+            token: nft,
+            refLevel: 1,
+            price: price,
+            amountFee: earningValue,
+          };
+          const newCommissionFeeF1 = await this.nftService.createCommissionFee(commissionFee);
+        }
       }
     }
   }
@@ -115,5 +123,27 @@ export class PoolService {
       return true;
     }
     return false;
+  }
+
+  public async processSystemCommissionFee(owner: string, nft: string, price: number) {
+    const commissionFee = price * 0.13; // 13%
+    const maxValueCommissionFeeAvailable = await this.nftService.getAvailableCommissionFeeByUser(
+      owner,
+    );
+    const earningValue =
+      maxValueCommissionFeeAvailable > commissionFee
+        ? commissionFee
+        : maxValueCommissionFeeAvailable;
+    const commissionFeeData = {
+      from: owner,
+      owner: owner,
+      token: nft,
+      refLevel: 0, // nhận trực tiếp
+      price: price,
+      amountFee: earningValue,
+    };
+
+    const newCommissionFeeF1 = await this.nftService.createCommissionFee(commissionFeeData);
+    return newCommissionFeeF1;
   }
 }

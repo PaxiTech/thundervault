@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { IExchange } from '@src/exchange/interfaces/exchange.interface';
 import { ExchangeService } from '@src/exchange/services/exchange.services';
 import { UserService } from '@src/user/services/user.services';
+import { NftService } from '@src/nft/services/nft.services';
 import { Contract, ethers, formatEther } from 'ethers';
 import * as moment from 'moment-timezone';
 @Injectable()
@@ -26,6 +27,7 @@ export class BlockchainService {
     private configService: ConfigService,
     private exchangeService: ExchangeService,
     private userService: UserService,
+    private nftService: NftService,
   ) {
     this.ownerWallet = this.configService.get<string>('ownerWallet');
     this.ownerNftWallet = this.configService.get<string>('ownerNftWallet');
@@ -36,23 +38,15 @@ export class BlockchainService {
     );
 
     // mainnet
-    this.providerBsc = ethers.getDefaultProvider(
-      'https://bsc-dataseed.binance.org/',
-    );
+    // this.providerBsc = ethers.getDefaultProvider('https://bsc-dataseed.binance.org/');
     // testnet
-    // this.providerBsc = ethers.getDefaultProvider(
-    //   'https://data-seed-prebsc-1-s1.binance.org:8545/',
-    // );
-    // this.savePresave();
+    //this.providerBsc = ethers.getDefaultProvider('https://data-seed-prebsc-1-s1.binance.org:8545/');
+    this.savePresave();
     // this.onWatchNft();
-    this.getRateTokenUsdt();
+    // this.getRateTokenUsdt();
   }
   async savePresave() {
-    const contract = new Contract(
-      this.usdtAddress,
-      this.abiTransferEvent,
-      this.providerAnkr,
-    );
+    const contract = new Contract(this.usdtAddress, this.abiTransferEvent, this.providerAnkr);
 
     contract.on('Transfer', (from, to: string, _amount, event) => {
       const amount = +formatEther(_amount);
@@ -88,26 +82,28 @@ export class BlockchainService {
   }
 
   async onWatchNft() {
-    console.log("nft address", this.nftAddress);
+    console.log('nft address', this.nftAddress);
 
     const contract = new Contract(this.nftAddress, this.abiNft, this.providerBsc);
 
     // because Ankr provider limit call
     const contractBsc = new Contract(this.nftAddress, this.abiNft, this.providerBsc);
     contract.on('Transfer', (from, to: string, tokenId, event) => {
-
       // has minted
-      if (to.toLowerCase() == this.ownerNftWallet.toLowerCase() && from.toLowerCase() == '0x0000000000000000000000000000000000000000') {
+      if (
+        to.toLowerCase() == this.ownerNftWallet.toLowerCase() &&
+        from.toLowerCase() == '0x0000000000000000000000000000000000000000'
+      ) {
         contractBsc
           .getFunction('getTokenLevel')(tokenId)
           .then((level) => {
             // TODO: save new nft
             // /nft/{level}/{tokenId}.json
+            this.nftService.generateNft(from, tokenId, level);
           });
       }
       // has burned
       else if (to.toLowerCase() == '0x0000000000000000000000000000000000000000') {
-
       }
 
       //TODO: update nft owner = to
@@ -121,99 +117,28 @@ export class BlockchainService {
 
         //TODO: update nft staked
       });
-      contract.on('Unstaked', (tokenId, address, event) => {
-        //TODO: update nft unstaked
-      });
+    });
+    contract.on('Unstaked', (tokenId, address, event) => {
+      //TODO: update nft unstaked
     });
   }
 
-  async getRateTokenUsdt() {
+  async getRateTokenUsdt(): Promise<number> {
     const pancakeRouterAddress = '0x10ED43C718714eb63d5aA57B78B54704E256024E';
     const pancakeRouterAbi = [
       'function getAmountsOut(uint256 amountIn, address[] memory path) internal view returns (uint256[] memory amounts)',
     ];
-    const pancakeRouterContract = new ethers.Contract(pancakeRouterAddress, pancakeRouterAbi, this.providerAnkr);
+    const pancakeRouterContract = new ethers.Contract(
+      pancakeRouterAddress,
+      pancakeRouterAbi,
+      this.providerAnkr,
+    );
 
     const amountIn = ethers.parseUnits('1');
     const path = [this.usdtAddress, this.tdvAddress];
     const amounts = await pancakeRouterContract.getAmountsOut(amountIn, path);
     const rate = formatEther(amounts[1]);
 
-    return rate;
+    return parseFloat(rate);
   }
-
-  // async staking() {
-  //   const mintNftAbi = [
-  //     'event Transfer(address indexed from,address indexed to, address indexed token, unit price)',
-  //   ];
-  //   const mintNftContract = new Contract(
-  //     '0x55d398326f99059fF775485246999027B3197955',
-  //     mintNftAbi,
-  //     this.provider,
-  //   );
-
-  //   mintNftContract.on('Transfer', async (from, to, token, price, event) => {
-  //     if (this.stakingOwnerWallet.toLowerCase() == to.toLowerCase()) {
-  //       console.log(`staking ${from} => ${to}: ${token}: ${price}: ${event.log.transactionHash}`);
-
-  //       //get token
-  //       const nft = await this.nftService.getNftInfo(token);
-  //       if (!nft) {
-  //         console.log(`nft was not found :${token}`);
-  //       }
-  //       //update or insert user
-  //       await this.userService.upsertUser(from);
-
-  //       //create starking
-  //       const createData: IPool = {
-  //         from: from,
-  //         to: to,
-  //         nft: token,
-  //         price: price,
-  //         level: nft?.level,
-  //         remainEarningTime: nft?.remainEarningTime,
-  //         transactionHash: event.log.transactionHash,
-  //         startTime: moment().format('YYYY-MM-DD HH:mm:ss'),
-  //       };
-  //       this.poolService.staking(createData);
-  //     }
-  //   });
-  // }
-
-  // async sendToMarket() {
-  //   const mintNftAbi = [
-  //     'event Transfer(address indexed from,address indexed to, address indexed token)',
-  //   ];
-  //   const mintNftContract = new Contract(
-  //     '0x55d398326f99059fF775485246999027B3197955',
-  //     mintNftAbi,
-  //     this.provider,
-  //   );
-
-  //   mintNftContract.on('Transfer', async (from, to, token, level, event) => {
-  //     if (this.stakingOwnerWallet.toLowerCase() == to.toLowerCase()) {
-  //       console.log(`staking ${from} => ${to}: ${token}: ${event.log.transactionHash}`);
-
-  //       //get token
-  //       const nft = await this.nftService.getNftInfo(token);
-  //       if (!nft) {
-  //         console.log(`nft was not found :${token}`);
-  //       }
-  //       //update or insert user
-  //       await this.userService.upsertUser(from);
-
-  //       //create starking
-  //       // const createData: IPool = {
-  //       //   from: from,
-  //       //   to: to,
-  //       //   nft: token,
-  //       //   level: nft?.level,
-  //       //   remainEarningTime: nft?.remainEarningTime,
-  //       //   transactionHash: event.log.transactionHash,
-  //       //   startTime: moment().format('YYYY-MM-DD HH:mm:ss'),
-  //       // };
-  //       // this.poolService.staking(createData);
-  //     }
-  //   });
-  // }
 }
