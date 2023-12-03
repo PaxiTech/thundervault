@@ -1,37 +1,39 @@
-import { Body, Controller, Post, Request } from '@nestjs/common';
-import {
-  ApiBadRequestResponse,
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiQuery,
-  ApiTags,
-} from '@nestjs/swagger';
-import { ErrorResponse } from '@src/common/contracts/openapi';
-import { pagination } from '@src/common/decorators/pagination';
-import { PaginateDto } from '@src/common/dtos/paginate.dto';
-import { StoreListResponse } from '@src/store/dtos/store-response.dto';
-import { StoreListDto } from '@src/store/dtos/list.dto';
-import { StoreService } from '@src/store/services/store.services';
-import { NftService } from '@src/nft/services/nft.services';
+import { Body, Controller, Post } from '@nestjs/common';
+import { ApiBadRequestResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { BlockchainService } from '@src/blockchain/blockchain.service';
+import { ErrorResponse } from '@src/common/contracts/openapi';
+import { NftService } from '@src/nft/services/nft.services';
+import { StoreListDto } from '@src/store/dtos/list.dto';
+import { StoreItemResponse, StoreListResponse } from '@src/store/dtos/store-response.dto';
+import { StoreService } from '@src/store/services/store.services';
+import { StoreBuyNftDto } from '../dtos/store-buy-nft.dto';
 
 @ApiTags('Store')
 @Controller('store')
 export class StoreController {
-  constructor(private storeService: StoreService, private nftService: NftService, private blockchainService: BlockchainService) { }
+  constructor(
+    private storeService: StoreService,
+    private nftService: NftService,
+    private blockchainService: BlockchainService,
+  ) {}
 
   @Post('')
   @ApiOkResponse({ type: StoreListResponse })
   @ApiBadRequestResponse({ type: ErrorResponse })
-  async getStoreHistory(@Body() storeListDto: StoreListDto) {
-    const result = await this.nftService.getStoreList(storeListDto);
+  async getStoreList(@Body() storeListDto: StoreListDto) {
+    //const rate = await this.blockchainService.getRateTokenUsdt();
+    const rate = 1.1;
+    const result = await this.nftService.getStoreList(storeListDto, rate);
     return result;
   }
 
-  async buyNft(@Request() req, @Body() body) {
-    const { address, level } = body;
+  @Post('staking')
+  @ApiOkResponse({ type: StoreItemResponse })
+  @ApiBadRequestResponse({ type: ErrorResponse })
+  async buyNft(@Body() storeBuyNftDto: StoreBuyNftDto) {
+    const { wallet, level, type } = storeBuyNftDto;
     const rate = await this.blockchainService.getRateTokenUsdt();
-    // TODO: calc nft price = nft price usdt * rate
-    // TODO: cache address and price
+    const result = await this.nftService.getNftInfoToBuyNft(wallet, level, type, rate);
+    return result;
   }
 }

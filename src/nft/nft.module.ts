@@ -4,10 +4,10 @@ import { Nft, NftSchema } from '@src/nft/schemas/nft.schema';
 import { NftRepository } from '@src/nft/repositories/nft.repository';
 import { CommissionFee, CommissionFeeSchema } from '@src/nft/schemas/commissionfee.schema';
 import { CommissionFeeRepository } from '@src/nft/repositories/commissionfee.repository';
-
 import { NftService } from '@src/nft/services/nft.services';
 import { NftController } from './controllers/nft.controller';
 import { UtilHelperService } from '@src/utils/helper.service';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -15,6 +15,7 @@ import { UtilHelperService } from '@src/utils/helper.service';
       { name: Nft.name, schema: NftSchema },
       { name: CommissionFee.name, schema: CommissionFeeSchema },
     ]),
+    CacheModule.register(),
   ],
   providers: [NftRepository, CommissionFeeRepository, NftService, UtilHelperService],
   exports: [NftRepository, CommissionFeeRepository, NftService, UtilHelperService],

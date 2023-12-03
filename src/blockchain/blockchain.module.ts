@@ -5,7 +5,8 @@ import { NftModule } from '@src/nft/nft.module';
 import { PoolModule } from '@src/pool/pool.module';
 
 @Module({
-  providers: [BlockchainService],
   imports: [ExchangeModule, NftModule, PoolModule],
+  providers: [BlockchainService],
+  exports: [BlockchainService],
 })
 export class BlockchainModule {}

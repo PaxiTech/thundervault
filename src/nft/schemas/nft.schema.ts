@@ -19,6 +19,11 @@ export enum NFT_STATUS {
   MARKET = 4, // đang trên market
 }
 
+export enum NFT_TYPE {
+  TYPE_1 = 1,
+  TYPE_2 = 2,
+  TYPE_3 = 3,
+}
 export enum NFT_ACTION {
   market = 'market',
   staking = 'staking',
@@ -49,6 +54,12 @@ export class Nft {
 
   @Prop({ required: true, default: NFT_STATUS.STORE })
   status: number;
+
+  @Prop()
+  type: number;
+
+  @Prop()
+  amount: number;
 
   @Prop()
   remainEarningTime?: number;

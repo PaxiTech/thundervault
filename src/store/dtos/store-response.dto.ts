@@ -7,25 +7,19 @@ export enum StoreType {
 
 export class StoreItem {
   @ApiProperty()
-  _id: string;
+  toWallet: string;
 
   @ApiProperty()
-  token: string;
+  amount: number;
 
   @ApiProperty()
-  owner: string;
+  type: number;
 
   @ApiProperty()
   level: number;
 
   @ApiProperty()
   earningTime?: number;
-
-  @ApiProperty({ type: Date })
-  createdAt?: Date;
-
-  @ApiProperty({ type: Date })
-  updatedAt?: Date;
 }
 export class StoreItemResponse {
   @ApiProperty()

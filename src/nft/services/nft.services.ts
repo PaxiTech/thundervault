@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Errors } from '@src/common/contracts/error';
 import { PaginateDto } from '@src/common/dtos/paginate.dto';
@@ -14,6 +14,8 @@ import { get as _get } from 'lodash';
 import { ActionDto } from '../dtos/action.dto';
 import { CommissionFeeRepository } from '../repositories/commissionfee.repository';
 import { CommissionFeeDocument } from '../schemas/commissionfee.schema';
+import { Cache } from 'cache-manager';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @Injectable()
 export class NftService {
@@ -21,22 +23,34 @@ export class NftService {
     private nftRepository: NftRepository,
     private commissionFeeRepository: CommissionFeeRepository,
     private configService: ConfigService,
+    @Inject(CACHE_MANAGER) private cacheService: Cache,
   ) {}
 
-  public async generateNft(token: string, level: number): Promise<any> {
+  public async generateNft(
+    from: string,
+    token: string,
+    level: number,
+    type?: number,
+  ): Promise<any> {
+    if (!type) {
+      type = Math.floor(Math.random() * 3) + 1;
+    }
+    const cache_key = `${from}-${level}-${type}`;
+    const price = await this.cacheGetKey(cache_key);
     const nftInfo = await this.getNftInfo(token, false);
-    const metaData = this.getMetadata(level);
+    const metaData = this.getMetadata(level, type);
     if (nftInfo) {
       return nftInfo;
     } else {
       //lưu nft master
-      // const nftOwnerWallet = this.configService.get<string>('nftOwnerWallet');
       const nftEntity = await this.nftRepository.create({
         token: token,
-        owner: STORE_OWNER,
+        owner: from,
         level: level,
-        price: metaData.price,
-        earningTime: metaData.earningTime,
+        price: price,
+        type: type,
+        status: NFT_STATUS.WALLET,
+        earningTime: metaData?.earningTime,
       });
       // tạo file json cho nft
       this.saveNFTAsJson(token, metaData);
@@ -96,9 +110,11 @@ export class NftService {
     return nftInfo;
   }
 
-  public getMetadata(nftLevel: number) {
+  public getMetadata(nftLevel: number, type: number) {
     if (metaDataSimple[nftLevel]) {
-      return metaDataSimple[nftLevel];
+      return metaDataSimple[nftLevel].find((item) => {
+        return item.type === type;
+      });
     }
   }
   /**
@@ -107,31 +123,41 @@ export class NftService {
    * @returns
    */
   public populateNftInfo(nft: NftDocument) {
-    const metaData = this.getMetadata(nft.level);
+    const metaData = this.getMetadata(nft.level, nft.type);
     const data = {
       _id: _get(nft, '_id'),
       token: nft.token,
       owner: nft.owner,
       level: nft.level,
       price: nft.price,
+      type: nft.type,
       status: nft.status,
       metaData: metaData,
-      // earningTime: nft.earningTime,
+      earningTime: nft.earningTime,
       createdAt: _get(nft, 'createdAt'),
       updatedAt: _get(nft, 'updatedAt'),
     };
     return data;
   }
-
-  async getStoreList(storeListDto: StoreListDto) {
-    const nftStoreList = await this.nftRepository.getStoreNft();
-    const result = new NftListItem();
-    const list = nftStoreList.map((item) => {
-      return this.populateNftInfo(item?.nft);
+  async getStoreList(storeListDto: StoreListDto, rate: number) {
+    const storeList = { ...metaDataSimple };
+    const list = {};
+    Object.keys(storeList).map((key) => {
+      list[key] = storeList[key]?.map((item) => {
+        return {
+          name: item.name,
+          description: item.description,
+          image: item.image,
+          type: item.type,
+          level: item.level,
+          amount: (item.amount * rate).toFixed(2),
+          earningTime: item.earningTime,
+          status: NFT_STATUS.STORE,
+          stock: 10, // sẽ tính số lượng còn lại sau.
+        };
+      });
     });
-
-    result.docs = list;
-    return { ...result };
+    return list;
   }
   async getListNftByUser(wallet: string, status: number, paginationParam: PaginateDto) {
     const conditions = { owner: wallet };
@@ -325,5 +351,34 @@ export class NftService {
   //history get commission fee
   public async createCommissionFee(data) {
     return await this.commissionFeeRepository.create(data);
+  }
+  public async getNftInfoToBuyNft(
+    wallet: string,
+    level: number,
+    type: number,
+    rate: number,
+  ): Promise<any> {
+    const metaData = this.getMetadata(level, type);
+    const cache_key = `${wallet}-${level}-${type}`;
+    const price = metaData.amount * rate;
+    this.cacheSetKey(cache_key, price);
+    const toWallet = this.configService.get<string>('nftOwnerWallet');
+    const result = {
+      toWallet: toWallet,
+      amount: price,
+      type: type,
+      level: level,
+      earningTime: metaData.earningTime,
+    };
+    return result;
+  }
+  public async cacheGetKey(key: string) {
+    return await this.cacheService.get(key);
+  }
+  public async cacheSetKey(key: string, value: any) {
+    await this.cacheService.set(key, value);
+  }
+  public async cacheDelKey(key: string) {
+    await this.cacheService.del(key);
   }
 }
