@@ -47,9 +47,6 @@ export class Nft {
   level: number;
 
   @Prop({ required: true })
-  price: number;
-
-  @Prop({ required: true })
   earningTime: number;
 
   @Prop({ required: true, default: NFT_STATUS.STORE })
@@ -60,6 +57,9 @@ export class Nft {
 
   @Prop()
   amount: number;
+
+  @Prop()
+  price?: number;
 
   @Prop()
   remainEarningTime?: number;

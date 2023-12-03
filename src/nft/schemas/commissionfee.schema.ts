@@ -2,6 +2,10 @@ import { Prop, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import * as paginate from 'mongoose-paginate-v2';
 
+export enum COMMISSION_TYPE {
+  DIRECT = 'direct',
+  STAKING = 'staking',
+}
 export type CommissionFeeDocument = HydratedDocument<CommissionFee>;
 export class CommissionFee {
   @Prop({ required: true })
@@ -24,6 +28,9 @@ export class CommissionFee {
 
   @Prop()
   refLevel: number;
+
+  @Prop()
+  type: number;
 }
 
 export const CommissionFeeSchema = SchemaFactory.createForClass(CommissionFee);

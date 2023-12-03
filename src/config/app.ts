@@ -12,6 +12,9 @@ export default () => ({
   nftOwnerWallet: process.env.NFTOWNERWALLET || '',
   stakingOwnerWallet: process.env.STAKINGOWNERWALLET || '',
   marketOwnerWallet: process.env.MARKETOWNERWALLET || '',
+  systemWallet: process.env.SYSTEMWALLET || '',
+  f0Wallet: process.env.F0WALLET || '',
+  totalSystemCommissionFee: process.env.TOTALSYSTEMCOMMISSIONFEE || 0,
   nftAddress: process.env.NFT_ADDRESS || '',
   tdvAddress: process.env.TDV_ADDRESS || '',
   configSecretKey:

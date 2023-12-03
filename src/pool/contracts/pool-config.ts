@@ -1,6 +1,6 @@
 import { USER_LEVEL } from '@src/user/schemas/user.schema';
 const { BRONZE, SILVER, GOLD, PLATINUM, RUBY, DIAMOND } = USER_LEVEL;
-export const brokerageFeeStaking = {
+export const directFeeConfig = {
   F1: {
     [BRONZE]: 0.05, //5%
     [SILVER]: 0.1, // 10%
@@ -66,8 +66,9 @@ export const brokerageFeeStaking = {
     [DIAMOND]: 0.005, // 1%
   },
 };
+export const totalDirectFeeConfig = 0.13; // 13%
 
-export const brokerageFeeMarket = {
+export const stakingFeeConfig = {
   F1: {
     [BRONZE]: 0.1, //10%
     [SILVER]: 0.2, // 20%
@@ -133,3 +134,5 @@ export const brokerageFeeMarket = {
     [DIAMOND]: 0.0025, // 0,25%
   },
 };
+
+export const totalStakingFeeConfig = 0.275; // 20.75 %

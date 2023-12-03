@@ -30,4 +30,20 @@ export class CommissionFeeRepository extends AbstractRepository<CommissionFeeDoc
 
     return record.amountFee;
   }
+  async getCurrentTotalCommissionFeeSystem(): Promise<number> {
+    const data = await this.aggregate([
+      {
+        $group: {
+          _id: null,
+          currentTotalFree: { $sum: '$amountFee' },
+        },
+      },
+    ]).exec();
+    const record = _get(data, 0);
+    if (!record) {
+      return 0;
+    }
+
+    return record.currentTotalFree;
+  }
 }
