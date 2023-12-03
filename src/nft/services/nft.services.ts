@@ -35,8 +35,6 @@ export class NftService {
     if (!type) {
       type = Math.floor(Math.random() * 3) + 1;
     }
-    const cache_key = `${from}-${level}-${type}`;
-    const price = await this.cacheGetKey(cache_key);
     const nftInfo = await this.getNftInfo(token, false);
     const metaData = this.getMetadata(level, type);
     if (nftInfo) {
@@ -45,11 +43,11 @@ export class NftService {
       //lưu nft master
       const nftEntity = await this.nftRepository.create({
         token: token,
-        owner: from,
+        owner: STORE_OWNER,
         level: level,
-        price: price,
         type: type,
-        status: NFT_STATUS.WALLET,
+        status: NFT_STATUS.STORE,
+        amount: metaData?.amount,
         earningTime: metaData?.earningTime,
       });
       // tạo file json cho nft
@@ -342,6 +340,10 @@ export class NftService {
     return await this.commissionFeeRepository.getTotalCommissionFeeStakingByUser(wallet);
   }
 
+  public async getCurrentTotalCommissionFeeSystem() {
+    return await this.commissionFeeRepository.getCurrentTotalCommissionFeeSystem();
+  }
+
   public async getAvailableCommissionFeeByUser(wallet: string) {
     const totalCommissionFee = await this.getCurrentTotalCommissionFeeByUser(wallet);
     const maxCommissionFee = await this.getMaxValueStakingByUser(wallet);
@@ -380,5 +382,11 @@ export class NftService {
   }
   public async cacheDelKey(key: string) {
     await this.cacheService.del(key);
+  }
+  public async updateOwner(nft: string, owner: string) {
+    const conditions = { token: nft };
+    const dataUpdate = { owner: owner, status: NFT_STATUS.WALLET };
+    const options = { new: true };
+    await this.nftRepository.findOneAndUpdate(conditions, dataUpdate, options);
   }
 }

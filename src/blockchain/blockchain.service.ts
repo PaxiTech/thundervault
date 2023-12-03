@@ -104,9 +104,12 @@ export class BlockchainService {
       }
       // has burned
       else if (to.toLowerCase() == '0x0000000000000000000000000000000000000000') {
+        // TODO: delete nft
+        // xóa luôn json file không hay chỉ cần đưa về store?
       }
 
       //TODO: update nft owner = to
+      this.nftService.updateOwner(tokenId, from);
     });
 
     contract.on('Staked', (tokenId, address, event) => {
