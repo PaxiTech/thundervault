@@ -105,4 +105,9 @@ export const Errors = {
     message: 'Invalid owner nft',
     status: HttpStatus.NOT_FOUND,
   },
+  NFT_OUT_OF_STOCK: {
+    code: 'NFT_OUT_OF_STOCK',
+    message: 'The nft is out of stock.',
+    status: HttpStatus.NOT_FOUND,
+  },
 };

@@ -404,6 +404,21 @@ export class NftService {
     const price = metaData.amount * rate;
     this.cacheSetKey(cache_key, price);
     const toWallet = this.configService.get<string>('nftOwnerWallet');
+    // cần gọi api kiểm stra xem còn nft loại này trong store không nếu mà có kiểm soát số lượng nft tối đa
+    const conditions = {
+      owner: STORE_OWNER,
+      level: level,
+      type: type,
+      status: NFT_STATUS.STORE,
+    };
+    const entity = await this.nftRepository.findOne({
+      conditions: conditions,
+    });
+    // tạm thời bỏ check
+    // if (!entity) {
+    //   const { code, message, status } = Errors.NFT_OUT_OF_STOCK;
+    //   throw new AppException(code, message, status);
+    // }
     const result = {
       toWallet: toWallet,
       amount: price,
