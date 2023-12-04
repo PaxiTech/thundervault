@@ -131,7 +131,7 @@ export class NftService {
       type: nft.type,
       status: nft.status,
       metaData: metaData,
-      earningTime: nft.earningTime,
+      remainEarningTime: nft.remainEarningTime,
       createdAt: _get(nft, 'createdAt'),
       updatedAt: _get(nft, 'updatedAt'),
     };
@@ -212,7 +212,7 @@ export class NftService {
     return { ...result, ...pagination };
   }
 
-  public async stakingNft(actionDto: ActionDto) {
+  public async stakingNft(actionDto: ActionDto, data = {}) {
     const stakingOwnerWallet = this.configService.get<string>('stakingOwnerWallet');
     const { fromWallet, nft, action } = actionDto;
     let nftInfo = await this.getNftInfo(nft);
@@ -235,6 +235,39 @@ export class NftService {
         owner: stakingOwnerWallet,
         preOwner: nftInfo.owner,
         status: NFT_STATUS.STAKING,
+        ...data,
+      };
+      const options = { new: true };
+      nftInfo = await this.nftRepository.findOneAndUpdate(conditions, dataUpdate, options);
+      return this.populateNftInfo(nftInfo);
+    }
+  }
+
+  public async unStakingNft(actionDto: ActionDto, data = {}) {
+    const stakingOwnerWallet = this.configService.get<string>('stakingOwnerWallet');
+    const { fromWallet, nft, action } = actionDto;
+    let nftInfo = await this.getNftInfo(nft);
+    let isValidAction = false;
+    //staking action
+    if (
+      action === NFT_ACTION.staking &&
+      nftInfo.status === NFT_STATUS.STAKING &&
+      nftInfo.owner === stakingOwnerWallet &&
+      nftInfo.preOwner === fromWallet
+    ) {
+      isValidAction = true;
+    }
+    if (!isValidAction) {
+      const { code, message, status } = Errors.INVALID_STAKING_OWNER_NFT;
+      throw new AppException(code, message, status);
+    }
+    if (nftInfo && isValidAction) {
+      const conditions = { token: nft };
+      const dataUpdate = {
+        owner: fromWallet,
+        preOwner: '',
+        status: NFT_STATUS.WALLET,
+        ...data,
       };
       const options = { new: true };
       nftInfo = await this.nftRepository.findOneAndUpdate(conditions, dataUpdate, options);
@@ -374,7 +407,7 @@ export class NftService {
     };
     return result;
   }
-  public async cacheGetKey(key: string) {
+  public async cacheGetKey(key: string): Promise<any> {
     return await this.cacheService.get(key);
   }
   public async cacheSetKey(key: string, value: any) {
@@ -383,9 +416,12 @@ export class NftService {
   public async cacheDelKey(key: string) {
     await this.cacheService.del(key);
   }
-  public async updateOwner(nft: string, owner: string) {
+  public async updateNftOwner(nft: string, owner: string, status: number, price?: number) {
     const conditions = { token: nft };
-    const dataUpdate = { owner: owner, status: NFT_STATUS.WALLET };
+    const dataUpdate = { owner: owner, status: status };
+    if (price) {
+      dataUpdate['price'] = price;
+    }
     const options = { new: true };
     await this.nftRepository.findOneAndUpdate(conditions, dataUpdate, options);
   }
