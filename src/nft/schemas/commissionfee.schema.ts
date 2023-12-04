@@ -5,6 +5,7 @@ import * as paginate from 'mongoose-paginate-v2';
 export enum COMMISSION_TYPE {
   DIRECT = 'direct',
   STAKING = 'staking',
+  STAKING_DAY = 'staking_day',
 }
 export type CommissionFeeDocument = HydratedDocument<CommissionFee>;
 export class CommissionFee {

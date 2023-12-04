@@ -164,14 +164,25 @@ export class BlockchainService {
         this.poolService.processStaking(poolData);
       });
     });
-    contract.on('Unstaked', (tokenId, address, event) => async () => {
-      const actionDto: ActionDto = {
-        fromWallet: address,
-        nft: tokenId,
-        action: NFT_ACTION.staking,
-        status: NFT_STATUS.STAKING,
-      };
-      const nftInfo = await this.nftService.unStakingNft(actionDto);
+    contract.on('Unstaked', (tokenId, address, event) => {
+      contract.getStakeInfo(tokenId).then((info) => async () => {
+        const owner = info[0];
+        const startTime = info[1];
+        const stakedDays = info[2];
+
+        const actionDto: ActionDto = {
+          fromWallet: owner,
+          nft: tokenId,
+          action: NFT_ACTION.staking,
+          status: NFT_STATUS.STAKING,
+        };
+        const updateData = {
+          startTime: startTime,
+          chargeTime: startTime,
+          stakedDays: stakedDays,
+        };
+        const nftInfo = await this.nftService.unStakingNft(actionDto, updateData);
+      });
     });
   }
 

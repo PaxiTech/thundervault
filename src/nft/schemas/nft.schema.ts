@@ -59,6 +59,15 @@ export class Nft {
   amount: number;
 
   @Prop()
+  stakedDays: number;
+
+  @Prop()
+  chargeTime?: string;
+
+  @Prop()
+  startTime?: string;
+
+  @Prop()
   price?: number;
 
   @Prop()

@@ -16,10 +16,37 @@ export class NftItem {
   owner: string;
 
   @ApiProperty()
+  preOwner?: string;
+
+  @ApiProperty()
   level: number;
 
   @ApiProperty()
   earningTime?: number;
+
+  @ApiProperty()
+  status?: number;
+
+  @ApiProperty()
+  type?: number;
+
+  @ApiProperty()
+  amount?: number;
+
+  @ApiProperty()
+  stakedDays?: number;
+
+  @ApiProperty()
+  price?: number;
+
+  @ApiProperty()
+  chargeTime?: string;
+
+  @ApiProperty()
+  startTime?: string;
+
+  @ApiProperty()
+  remainEarningTime?: number;
 
   @ApiProperty({ type: Date })
   createdAt?: Date;

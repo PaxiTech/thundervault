@@ -9,15 +9,18 @@ import { get as _get, isEmpty as _isEmpty } from 'lodash';
 import { NftService } from '@src/nft/services/nft.services';
 import { UserItem } from '@src/user/dtos/user-response.dto';
 import { IPool } from '../interfaces/pool.interface';
+import * as moment from 'moment';
 
 import {
   directFeeConfig,
   totalDirectFeeConfig,
   stakingFeeConfig,
   totalStakingFeeConfig,
+  STAKING_FEE_PER_DAY,
 } from '@src/pool/contracts/pool-config';
 import { COMMISSION_TYPE } from '@src/nft/schemas/commissionfee.schema';
 import { PoolInfo } from '../dtos/pool-response.dto';
+import { NftItem } from '@src/nft/dtos/nft-response.dto';
 
 @Injectable()
 export class PoolService {
@@ -383,5 +386,68 @@ export class PoolService {
       myTotalNftStaked: myTotalNftStaked,
     };
     return data;
+  }
+
+  public async processCommissionFeeEveryDay() {
+    const listNftStaked = await this.getListNftCanReceiveCommissionFeeEveryDay();
+    if (_isEmpty(listNftStaked)) {
+      return [];
+    }
+    listNftStaked.forEach(async (item) => {
+      await this.processCommissionFeeEveryDayByUser(item);
+    });
+  }
+  public async getListNftCanReceiveCommissionFeeEveryDay() {
+    const nfts = await this.nftService.getAllNftStaking();
+    const currentTime = moment().startOf('day').toDate();
+    // Lọc danh sách user dựa trên startTime
+    const filterNftList = nfts.filter((item) => {
+      const startTime = moment(item.startTime);
+      const hoursDiff = startTime.diff(currentTime, 'hours');
+      return hoursDiff >= 24;
+    });
+
+    return filterNftList;
+  }
+
+  public async processCommissionFeeEveryDayByUser(nftInfo: NftItem) {
+    if (!nftInfo.preOwner) {
+      return;
+    }
+    const { token, price, preOwner, stakedDays } = nftInfo;
+    //lấy thông tin F1
+    const userInfo = await this.userService.getUserInfo(nftInfo.preOwner);
+    const maxValueCommissionFeeAvailable = await this.nftService.getAvailableCommissionFeeByUser(
+      userInfo.wallet,
+    );
+    // chỉ xử lý khi còn có thể nhận được commission fee
+    if (maxValueCommissionFeeAvailable > 0 && stakedDays > 1) {
+      // lấy giá trị config cho từng level ref.
+
+      // tính ra số tiền hoa hồng nhận được.
+      let earningValue = this.helperService.calculateEarningValue(price, STAKING_FEE_PER_DAY);
+      earningValue =
+        maxValueCommissionFeeAvailable - earningValue > 0
+          ? earningValue
+          : maxValueCommissionFeeAvailable - earningValue;
+      const commissionFee = {
+        from: userInfo.wallet, //kiếm tiền từ chính nó.
+        owner: userInfo.wallet,
+        token: token,
+        price: price,
+        amountFee: earningValue,
+        refLevel: 0, // nhận trực tiếp
+        type: COMMISSION_TYPE.STAKING_DAY,
+      };
+      await this.nftService.createCommissionFee(commissionFee);
+      // update nft info and nft pool info
+      const currentTime = moment().startOf('day').toDate();
+      const updateData = {
+        startTime: currentTime,
+        chargeTime: currentTime,
+        stakedDate: stakedDays - 1,
+      };
+      const nftInfo = await this.nftService.updateNft(token, preOwner, updateData);
+    }
   }
 }
