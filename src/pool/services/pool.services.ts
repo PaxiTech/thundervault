@@ -17,6 +17,7 @@ import {
   totalStakingFeeConfig,
 } from '@src/pool/contracts/pool-config';
 import { COMMISSION_TYPE } from '@src/nft/schemas/commissionfee.schema';
+import { PoolInfo } from '../dtos/pool-response.dto';
 
 @Injectable()
 export class PoolService {
@@ -334,5 +335,27 @@ export class PoolService {
 
     const directCommissionFee = await this.nftService.createCommissionFee(commissionFeeData);
     return directCommissionFee;
+  }
+
+  public async poolInfo(wallet: string) {
+    // lấy tổng số tiền quỹ cấu hình cho chức năng staking
+    const totalSystemCommissionFee = this.configService.get<number>('totalSystemCommissionFee');
+    // lấy tổng số tiền đã trả cho staking
+    const currentTotalCommissionFeeSystem =
+      await this.nftService.getCurrentTotalCommissionFeeSystem();
+    // tính tổng số tiền còn lại của quỹ staking
+    const remainCommissionFee = totalSystemCommissionFee - currentTotalCommissionFeeSystem;
+    const myCommissionFee = await this.nftService.getCurrentTotalCommissionFeeByUser(wallet);
+    const totalNftStaked = await this.nftService.countAllNftStaked();
+    const myTotalNftStaked = await this.nftService.countNftStakedByUser(wallet);
+    const data: PoolInfo = {
+      totalSystemCommissionFee: totalSystemCommissionFee,
+      currentTotalCommissionFeeSystem: currentTotalCommissionFeeSystem,
+      remainCommissionFee: remainCommissionFee,
+      myCommissionFee: myCommissionFee,
+      totalNftStaked: totalNftStaked,
+      myTotalNftStaked: myTotalNftStaked,
+    };
+    return data;
   }
 }

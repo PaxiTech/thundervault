@@ -43,4 +43,47 @@ export class NftRepository extends AbstractRepository<NftDocument> {
 
     return record.amount;
   }
+  async countNftStakedByUser(wallet: string): Promise<number> {
+    const data = await this.aggregate([
+      {
+        $match: {
+          preOwner: wallet, // ví của user đang staking
+          status: NFT_STATUS.STAKING, // điệu kiện nft đang staking
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          count: { $sum: 1 },
+        },
+      },
+    ]).exec();
+    const record = _get(data, 0);
+    if (!record) {
+      return 0;
+    }
+
+    return record.count;
+  }
+  async countAllNftStaked(): Promise<number> {
+    const data = await this.aggregate([
+      {
+        $match: {
+          status: NFT_STATUS.STAKING, // điệu kiện nft đang staking
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          count: { $sum: 1 },
+        },
+      },
+    ]).exec();
+    const record = _get(data, 0);
+    if (!record) {
+      return 0;
+    }
+
+    return record.count;
+  }
 }

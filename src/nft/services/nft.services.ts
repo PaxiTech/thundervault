@@ -389,4 +389,11 @@ export class NftService {
     const options = { new: true };
     await this.nftRepository.findOneAndUpdate(conditions, dataUpdate, options);
   }
+
+  public async countNftStakedByUser(wallet: string) {
+    return await this.nftRepository.countNftStakedByUser(wallet);
+  }
+  public async countAllNftStaked() {
+    return await this.nftRepository.countAllNftStaked();
+  }
 }

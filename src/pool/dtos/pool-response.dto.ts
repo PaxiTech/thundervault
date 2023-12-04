@@ -42,3 +42,29 @@ export class PoolListResponse {
   @ApiProperty()
   data: PoolListItem;
 }
+
+export class PoolInfo {
+  @ApiProperty()
+  totalNftStaked: number;
+
+  @ApiProperty()
+  totalSystemCommissionFee: number;
+
+  @ApiProperty()
+  currentTotalCommissionFeeSystem: number;
+
+  @ApiProperty()
+  remainCommissionFee: number;
+
+  @ApiProperty()
+  myTotalNftStaked: number;
+
+  @ApiProperty()
+  myCommissionFee: number;
+}
+export class PoolInfoResponse {
+  @ApiProperty()
+  status: number;
+  @ApiProperty({ type: PoolInfo })
+  data: PoolInfo;
+}
