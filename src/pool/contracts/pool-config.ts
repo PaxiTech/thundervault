@@ -66,7 +66,7 @@ export const directFeeConfig = {
     [DIAMOND]: 0.005, // 1%
   },
 };
-export const totalDirectFeeConfig = 0.13; // 13%
+export const totalDirectFeeConfig = 13 / 100; // 13%
 
 export const stakingFeeConfig = {
   F1: {
@@ -135,4 +135,6 @@ export const stakingFeeConfig = {
   },
 };
 
-export const totalStakingFeeConfig = 0.275; // 20.75 %
+export const totalStakingFeeConfig = 20.75 / 100; // 20.75 %
+
+export const STAKING_FEE_PER_DAY = 2 / 100; //2 % cho ngày.

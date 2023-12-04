@@ -126,11 +126,17 @@ export class NftService {
       _id: _get(nft, '_id'),
       token: nft.token,
       owner: nft.owner,
+      preOwner: nft.preOwner,
       level: nft.level,
-      price: nft.price,
-      type: nft.type,
+      earningTime: nft.earningTime,
       status: nft.status,
+      type: nft.type,
+      amount: nft.amount,
+      stakedDays: nft.stakedDays,
+      price: nft.price,
       metaData: metaData,
+      chargeTime: nft.chargeTime,
+      startTime: nft.startTime,
       remainEarningTime: nft.remainEarningTime,
       createdAt: _get(nft, 'createdAt'),
       updatedAt: _get(nft, 'updatedAt'),
@@ -426,10 +432,27 @@ export class NftService {
     await this.nftRepository.findOneAndUpdate(conditions, dataUpdate, options);
   }
 
+  public async updateNft(nft: string, owner: string, dataUpdate = {}) {
+    const conditions = { token: nft, owner: owner };
+    const options = { new: true };
+    await this.nftRepository.findOneAndUpdate(conditions, dataUpdate, options);
+  }
+
   public async countNftStakedByUser(wallet: string) {
     return await this.nftRepository.countNftStakedByUser(wallet);
   }
   public async countAllNftStaked() {
     return await this.nftRepository.countAllNftStaked();
+  }
+  async getAllNftStaking(): Promise<any> {
+    const conditions = { status: NFT_STATUS.STAKING };
+    const nftList = await this.nftRepository.find({
+      conditions: conditions,
+    });
+    const list = nftList.map((item) => {
+      return this.populateNftInfo(item);
+    });
+
+    return list;
   }
 }
