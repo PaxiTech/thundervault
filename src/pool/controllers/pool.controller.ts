@@ -3,8 +3,9 @@ import { ApiBadRequestResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { ErrorResponse } from '@src/common/contracts/openapi';
 import { CommonDto } from '@src/common/dtos/common.dto';
 import { NftService } from '@src/nft/services/nft.services';
-import { PoolInfoResponse } from '@src/pool/dtos/pool-response.dto';
+import { PoolInfoResponse, PoolItemResponse } from '@src/pool/dtos/pool-response.dto';
 import { PoolService } from '@src/pool/services/pool.services';
+import { StakingDto } from '../dtos/staking.dto';
 @ApiTags('Pool')
 @Controller('pool')
 export class PoolController {
@@ -16,6 +17,15 @@ export class PoolController {
   async info(@Body() commonDto: CommonDto) {
     const { wallet } = commonDto;
     const result = await this.poolService.poolInfo(wallet);
+    return result;
+  }
+
+  @Post('staking')
+  @ApiOkResponse({ type: PoolItemResponse })
+  @ApiBadRequestResponse({ type: ErrorResponse })
+  async staking(@Body() stakingDto: StakingDto) {
+    const { wallet, token } = stakingDto;
+    const result = await this.nftService.validateNftStaking(wallet, token);
     return result;
   }
 }

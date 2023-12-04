@@ -100,6 +100,11 @@ export const Errors = {
     message: 'Invalid buy nft',
     status: HttpStatus.NOT_FOUND,
   },
+  INVALID_STAKING_NFT: {
+    code: 'INVALID_STAKING_NFT',
+    message: 'Invalid staking nft',
+    status: HttpStatus.NOT_FOUND,
+  },
   INVALID_STAKING_OWNER_NFT: {
     code: 'INVALID_STAKING_OWNER_NFT',
     message: 'Invalid owner nft',
