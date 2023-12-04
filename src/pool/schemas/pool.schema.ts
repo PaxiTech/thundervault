@@ -39,11 +39,19 @@ export class Pool {
 
   @ApiProperty()
   @Prop()
+  type: number;
+
+  @ApiProperty()
+  @Prop()
+  stakedDays: number;
+
+  @ApiProperty()
+  @Prop()
   price: number;
 
   @ApiProperty()
   @Prop()
-  remainEarningTime: string;
+  remainEarningTime: number;
 }
 
 export const PoolSchema = SchemaFactory.createForClass(Pool);

@@ -6,6 +6,10 @@ import { UserService } from '@src/user/services/user.services';
 import { NftService } from '@src/nft/services/nft.services';
 import { Contract, ethers, formatEther } from 'ethers';
 import * as moment from 'moment-timezone';
+import { NFT_ACTION, NFT_STATUS, STORE_OWNER } from '@src/nft/schemas/nft.schema';
+import { IPool } from '@src/pool/interfaces/pool.interface';
+import { PoolService } from '@src/pool/services/pool.services';
+import { ActionDto } from '@src/nft/dtos/action.dto';
 @Injectable()
 export class BlockchainService {
   ownerWallet: string;
@@ -28,6 +32,7 @@ export class BlockchainService {
     private exchangeService: ExchangeService,
     private userService: UserService,
     private nftService: NftService,
+    private poolService: PoolService,
   ) {
     this.ownerWallet = this.configService.get<string>('ownerWallet');
     this.ownerNftWallet = this.configService.get<string>('ownerNftWallet');
@@ -106,23 +111,67 @@ export class BlockchainService {
       else if (to.toLowerCase() == '0x0000000000000000000000000000000000000000') {
         // TODO: delete nft
         // xóa luôn json file không hay chỉ cần đưa về store?
+        // tạm thời trả về store.
+        this.nftService.updateNftOwner(tokenId, STORE_OWNER, NFT_STATUS.STORE);
       }
 
       //TODO: update nft owner = to
-      this.nftService.updateOwner(tokenId, from);
+      contractBsc
+        .getFunction('getTokenLevel')(tokenId)
+        .then((level) => async () => {
+          //get cache price nft
+
+          const type = 1;
+          const cache_key = `${from}-${level}-${type}`;
+          const price = await this.nftService.cacheGetKey(cache_key);
+          //kiểm tra xem user có tồn tại cache không.
+          if (price) {
+            //cập nhật owner, price, status
+            this.nftService.updateNftOwner(tokenId, from, NFT_STATUS.WALLET, price);
+            await this.nftService.cacheDelKey(cache_key);
+          }
+        });
     });
 
     contract.on('Staked', (tokenId, address, event) => {
-      contract.getStakeInfo(tokenId).then((info) => {
+      contract.getStakeInfo(tokenId).then((info) => async () => {
         const owner = info[0];
         const startTime = info[1];
         const stakedDays = info[2];
 
         //TODO: update nft staked
+        const actionDto: ActionDto = {
+          fromWallet: owner,
+          nft: tokenId,
+          action: NFT_ACTION.staking,
+          status: NFT_STATUS.STAKING,
+        };
+        const updateData = {
+          startTime: startTime,
+          chargeTime: startTime,
+          stakedDays: stakedDays,
+        };
+        const nftInfo = await this.nftService.stakingNft(actionDto, updateData);
+        const poolData: IPool = {
+          from: owner,
+          to: address,
+          nft: tokenId,
+          startTime: startTime,
+          chargeTime: startTime,
+          stakedDays: stakedDays,
+          transactionHash: event.log.transactionHash,
+        };
+        this.poolService.processStaking(poolData);
       });
     });
-    contract.on('Unstaked', (tokenId, address, event) => {
-      //TODO: update nft unstaked
+    contract.on('Unstaked', (tokenId, address, event) => async () => {
+      const actionDto: ActionDto = {
+        fromWallet: address,
+        nft: tokenId,
+        action: NFT_ACTION.staking,
+        status: NFT_STATUS.STAKING,
+      };
+      const nftInfo = await this.nftService.unStakingNft(actionDto);
     });
   }
 

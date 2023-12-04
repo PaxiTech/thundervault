@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Type } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PoolRepository } from '@src/pool/repositories/pool.repository';
 import { PoolStakingRepository } from '@src/pool/repositories/pool.staking.repository';
@@ -41,18 +41,29 @@ export class PoolService {
       to: pool?.to,
       nft: pool?.nft,
       level: pool?.level,
+      type: pool?.type,
+      price: pool?.price,
+      startTime: pool?.startTime,
+      chargeTime: pool?.chargeTime,
+      remainEarningTime: pool?.remainEarningTime,
+      transactionHash: pool?.transactionHash,
       createdAt: _get(pool, 'createdAt'),
       updatedAt: _get(pool, 'updatedAt'),
     };
     return data;
   }
-  public async staking(stakingData: IPool): Promise<any> {
-    const { from } = stakingData;
+  public async processStaking(stakingData: IPool): Promise<any> {
+    const { from, nft } = stakingData;
     const userInfo = await this.userService.getUserInfo(from, { getRefCode: true });
+    const nftInfo = await this.nftService.getNftInfo(nft);
     const refCode = userInfo.refCode;
-    // const nftInfo = await this.nftService.getNftInfo(nft);
+    //pool là history của staking
     const createData = {
       ...stakingData,
+      level: nftInfo.level,
+      type: nftInfo.type,
+      price: nftInfo.price,
+      remainEarningTime: nftInfo.remainEarningTime,
     };
     const poolEntity = await this.poolRepository.create(createData);
     const poolInfo = this.populatePoolInfo(poolEntity);
@@ -62,11 +73,16 @@ export class PoolService {
       await this.userService.processMyRefCode(from, parentUserInfo.wallet);
     }
     await this.processDirectCommissionFeeSystem(from, stakingData.nft, stakingData.price);
-    await this.processReferralDirect(stakingData, userInfo);
+    await this.processUserCommissionFee(stakingData, userInfo);
     return poolInfo;
   }
 
-  public async processReferralDirect(stakingData: IPool, UserInfo: UserItem) {
+  /**
+   * xử lý staking
+   * @param stakingData
+   * @param UserInfo
+   */
+  public async processUserCommissionFee(stakingData: IPool, UserInfo: UserItem) {
     const { from, nft, price } = stakingData;
     const tokenLevel = stakingData.level;
     const wallet = UserInfo.wallet;
@@ -188,6 +204,11 @@ export class PoolService {
     return false;
   }
 
+  /**
+   * Tính hoa hồng trực tiếp
+   * @param param
+   * @returns
+   */
   public async processDirectCommissionFeeByLevel({
     from,
     userWallet,
@@ -226,6 +247,11 @@ export class PoolService {
     return nftCommissionFee;
   }
 
+  /**
+   * tính hoa hồng staking
+   * @param param
+   * @returns
+   */
   public async processStakingCommissionFeeByLevel({
     from,
     userWallet,
