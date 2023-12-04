@@ -455,4 +455,22 @@ export class NftService {
 
     return list;
   }
+
+  public async validateNftStaking(wallet: string, token: string): Promise<any> {
+    const toWallet = this.configService.get<string>('stakingOwnerWallet');
+    const nftInfo = await this.getNftInfo(token);
+    if (nftInfo.owner !== wallet) {
+      const { code, message, status } = Errors.INVALID_STAKING_OWNER_NFT;
+      throw new AppException(code, message, status);
+    }
+    if (nftInfo.status !== NFT_STATUS.WALLET) {
+      const { code, message, status } = Errors.INVALID_STAKING_NFT;
+      throw new AppException(code, message, status);
+    }
+    const result = {
+      toWallet: toWallet,
+      token: token,
+    };
+    return result;
+  }
 }
