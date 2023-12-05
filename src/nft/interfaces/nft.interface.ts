@@ -3,6 +3,7 @@ export interface INft {
   owner: string;
   level: number;
   price: number;
-  earningTime: number;
-  remainEarningTime: number;
+  originalStakedDays: number;
+  stakedDays: number;
+  remainStakedDays: number;
 }

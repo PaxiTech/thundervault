@@ -19,7 +19,7 @@ export class MarketItem {
   level: number;
 
   @ApiProperty()
-  earningTime?: number;
+  originalStakedDays?: number;
 
   @ApiProperty({ type: Date })
   createdAt?: Date;

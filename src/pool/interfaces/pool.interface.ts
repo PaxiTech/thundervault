@@ -7,7 +7,6 @@ export interface IPool {
   startTime: string;
   transactionHash?: string;
   chargeTime?: string;
-  remainEarningTime?: number;
   price?: number;
   stakedDays?: number;
 }

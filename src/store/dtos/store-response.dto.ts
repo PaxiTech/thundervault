@@ -19,7 +19,7 @@ export class StoreItem {
   level: number;
 
   @ApiProperty()
-  earningTime?: number;
+  originalStakedDays?: number;
 }
 export class StoreItemResponse {
   @ApiProperty()

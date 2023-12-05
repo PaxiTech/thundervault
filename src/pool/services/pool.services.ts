@@ -49,7 +49,6 @@ export class PoolService {
       price: pool?.price,
       startTime: pool?.startTime,
       chargeTime: pool?.chargeTime,
-      remainEarningTime: pool?.remainEarningTime,
       transactionHash: pool?.transactionHash,
       createdAt: _get(pool, 'createdAt'),
       updatedAt: _get(pool, 'updatedAt'),
@@ -67,7 +66,6 @@ export class PoolService {
       level: nftInfo.level,
       type: nftInfo.type,
       price: nftInfo.price,
-      remainEarningTime: nftInfo.remainEarningTime,
     };
     const poolEntity = await this.poolRepository.create(createData);
     const poolInfo = this.populatePoolInfo(poolEntity);

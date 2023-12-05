@@ -9,7 +9,7 @@ metaDataSimple[NFT_LEVEL.NFT_LEVEL_1] = [
     type: 1,
     level: 1,
     amount: 100,
-    earningTime: 10 * 24 * 60 * 60, // 10 days 24h 60m 60 s
+    originalStakedDays: 250,
   },
   {
     name: 'Basic Bronze Vault',
@@ -19,7 +19,7 @@ metaDataSimple[NFT_LEVEL.NFT_LEVEL_1] = [
     type: 2,
     level: 1,
     amount: 200,
-    earningTime: 20 * 24 * 60 * 60, // 20 days 24h 60m 60 s
+    originalStakedDays: 250,
   },
   {
     name: 'Basic Gold Vault',
@@ -29,7 +29,7 @@ metaDataSimple[NFT_LEVEL.NFT_LEVEL_1] = [
     type: 3,
     level: 1,
     amount: 300,
-    earningTime: 30 * 24 * 60 * 60, // 30 days 24h 60m 60 s
+    originalStakedDays: 250,
   },
 ];
 metaDataSimple[NFT_LEVEL.NFT_LEVEL_2] = [
@@ -41,7 +41,7 @@ metaDataSimple[NFT_LEVEL.NFT_LEVEL_2] = [
     type: 1,
     level: 2,
     amount: 100,
-    earningTime: 10 * 24 * 60 * 60, // 10 days 24h 60m 60 s
+    originalStakedDays: 250,
   },
   {
     name: 'Jungle Stainless Steel',
@@ -51,7 +51,7 @@ metaDataSimple[NFT_LEVEL.NFT_LEVEL_2] = [
     type: 2,
     level: 2,
     amount: 200,
-    earningTime: 20 * 24 * 60 * 60, // 20 days 24h 60m 60 s
+    originalStakedDays: 250,
   },
   {
     name: 'Sandstorm Citadel',
@@ -61,7 +61,7 @@ metaDataSimple[NFT_LEVEL.NFT_LEVEL_2] = [
     type: 3,
     level: 2,
     amount: 300,
-    earningTime: 30 * 24 * 60 * 60, // 30 days 24h 60m 60 s
+    originalStakedDays: 250,
   },
 ];
 metaDataSimple[NFT_LEVEL.NFT_LEVEL_3] = [
@@ -73,7 +73,7 @@ metaDataSimple[NFT_LEVEL.NFT_LEVEL_3] = [
     type: 1,
     level: 3,
     amount: 100,
-    earningTime: 10 * 24 * 60 * 60, // 10 days 24h 60m 60 s
+    originalStakedDays: 250,
   },
   {
     name: 'Cryo Citadel',
@@ -83,7 +83,7 @@ metaDataSimple[NFT_LEVEL.NFT_LEVEL_3] = [
     type: 2,
     level: 3,
     amount: 200,
-    earningTime: 20 * 24 * 60 * 60, // 20 days 24h 60m 60 s
+    originalStakedDays: 250,
   },
   {
     name: 'Obsidian Ruby',
@@ -93,7 +93,7 @@ metaDataSimple[NFT_LEVEL.NFT_LEVEL_3] = [
     type: 3,
     level: 3,
     amount: 300,
-    earningTime: 30 * 24 * 60 * 60, // 30 days 24h 60m 60 s
+    originalStakedDays: 250,
   },
 ];
 metaDataSimple[NFT_LEVEL.NFT_LEVEL_4] = [
@@ -105,7 +105,7 @@ metaDataSimple[NFT_LEVEL.NFT_LEVEL_4] = [
     type: 1,
     level: 4,
     amount: 100,
-    earningTime: 10 * 24 * 60 * 60, // 10 days 24h 60m 60 s
+    originalStakedDays: 250,
   },
   {
     name: "Strategist's Chessmaster Haven",
@@ -115,7 +115,7 @@ metaDataSimple[NFT_LEVEL.NFT_LEVEL_4] = [
     type: 2,
     level: 4,
     amount: 200,
-    earningTime: 20 * 24 * 60 * 60, // 20 days 24h 60m 60 s
+    originalStakedDays: 250,
   },
   {
     name: 'Melodious Harmony Forte',
@@ -125,7 +125,7 @@ metaDataSimple[NFT_LEVEL.NFT_LEVEL_4] = [
     type: 3,
     level: 4,
     amount: 300,
-    earningTime: 30 * 24 * 60 * 60, // 30 days 24h 60m 60 s
+    originalStakedDays: 250,
   },
 ];
 metaDataSimple[NFT_LEVEL.NFT_LEVEL_5] = [
@@ -137,7 +137,7 @@ metaDataSimple[NFT_LEVEL.NFT_LEVEL_5] = [
     type: 1,
     level: 5,
     amount: 100,
-    earningTime: 10 * 24 * 60 * 60, // 10 days 24h 60m 60 s
+    originalStakedDays: 250,
   },
   {
     name: 'Ancient Jungle Enclave',
@@ -147,7 +147,7 @@ metaDataSimple[NFT_LEVEL.NFT_LEVEL_5] = [
     type: 2,
     level: 5,
     amount: 200,
-    earningTime: 20 * 24 * 60 * 60, // 20 days 24h 60m 60 s
+    originalStakedDays: 250,
   },
   {
     name: "Pirate's Treasure Cove",
@@ -157,7 +157,7 @@ metaDataSimple[NFT_LEVEL.NFT_LEVEL_5] = [
     type: 3,
     level: 5,
     amount: 300,
-    earningTime: 30 * 24 * 60 * 60, // 30 days 24h 60m 60 s
+    originalStakedDays: 250,
   },
 ];
 metaDataSimple[NFT_LEVEL.NFT_LEVEL_6] = [
@@ -169,7 +169,7 @@ metaDataSimple[NFT_LEVEL.NFT_LEVEL_6] = [
     type: 1,
     level: 6,
     amount: 100,
-    earningTime: 10 * 24 * 60 * 60, // 10 days 24h 60m 60 s
+    originalStakedDays: 250,
   },
   {
     name: 'Celestial Conflict Vault',
@@ -179,7 +179,7 @@ metaDataSimple[NFT_LEVEL.NFT_LEVEL_6] = [
     type: 2,
     level: 6,
     amount: 200,
-    earningTime: 20 * 24 * 60 * 60, // 20 days 24h 60m 60 s
+    originalStakedDays: 250,
   },
   {
     name: 'Thunder Prime Vault',
@@ -189,6 +189,6 @@ metaDataSimple[NFT_LEVEL.NFT_LEVEL_6] = [
     type: 3,
     level: 6,
     amount: 300,
-    earningTime: 30 * 24 * 60 * 60, // 30 days 24h 60m 60 s
+    originalStakedDays: 250,
   },
 ];
