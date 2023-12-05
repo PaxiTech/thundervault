@@ -47,7 +47,7 @@ export class Nft {
   level: number;
 
   @Prop({ required: true })
-  earningTime: number;
+  originalStakedDays: number;
 
   @Prop({ required: true, default: NFT_STATUS.STORE })
   status: number;
@@ -69,9 +69,6 @@ export class Nft {
 
   @Prop()
   price?: number;
-
-  @Prop()
-  remainEarningTime?: number;
 }
 
 export const NftSchema = SchemaFactory.createForClass(Nft);

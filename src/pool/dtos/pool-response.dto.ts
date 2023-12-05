@@ -16,9 +16,6 @@ export class PoolItem {
   @ApiProperty()
   to: string; //owner wallet
 
-  @ApiProperty()
-  remainEarningTime: number;
-
   @ApiProperty({ type: Date })
   createdAt?: Date;
 

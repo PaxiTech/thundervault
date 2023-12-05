@@ -10,7 +10,7 @@ import { NftRepository } from '@src/nft/repositories/nft.repository';
 import { NFT_ACTION, NFT_STATUS, NftDocument, STORE_OWNER } from '@src/nft/schemas/nft.schema';
 import { StoreListDto } from '@src/store/dtos/list.dto';
 import * as fs from 'fs';
-import { get as _get } from 'lodash';
+import { get as _get, isNull as _isNull } from 'lodash';
 import { ActionDto } from '../dtos/action.dto';
 import { CommissionFeeRepository } from '../repositories/commissionfee.repository';
 import { CommissionFeeDocument } from '../schemas/commissionfee.schema';
@@ -48,7 +48,7 @@ export class NftService {
         type: type,
         status: NFT_STATUS.STORE,
         amount: metaData?.amount,
-        earningTime: metaData?.earningTime,
+        originalStakedDays: metaData?.originalStakedDays,
       });
       // tạo file json cho nft
       this.saveNFTAsJson(token, metaData);
@@ -128,7 +128,7 @@ export class NftService {
       owner: nft.owner,
       preOwner: nft.preOwner,
       level: nft.level,
-      earningTime: nft.earningTime,
+      originalStakedDays: nft.originalStakedDays,
       status: nft.status,
       type: nft.type,
       amount: nft.amount,
@@ -137,13 +137,12 @@ export class NftService {
       metaData: metaData,
       chargeTime: nft.chargeTime,
       startTime: nft.startTime,
-      remainEarningTime: nft.remainEarningTime,
       createdAt: _get(nft, 'createdAt'),
       updatedAt: _get(nft, 'updatedAt'),
     };
     return data;
   }
-  async getStoreList(storeListDto: StoreListDto, rate: number) {
+  async getStoreList(rate: number) {
     const storeList = { ...metaDataSimple };
     const list = {};
     Object.keys(storeList).map((key) => {
@@ -153,15 +152,41 @@ export class NftService {
           description: item.description,
           image: item.image,
           type: item.type,
-          level: item.level,
-          amount: (item.amount * rate).toFixed(2),
-          earningTime: item.earningTime,
+          level: item?.level,
+          amount: item.amount,
+          price: (item.amount * rate).toFixed(2),
+          originalStakedDays: item.originalStakedDays,
+          stakedDays: 0,
+          remainStakedDays: item.originalStakedDays,
           status: NFT_STATUS.STORE,
           stock: 10, // sẽ tính số lượng còn lại sau.
         };
       });
     });
     return list;
+  }
+  public async getDetailStore(type: number, level: number, rate: number) {
+    const storeList = await this.getStoreList(rate);
+    if (!storeList[level]) {
+      return [];
+    }
+    const storeNftInfo = storeList[level].find((item) => {
+      return item.type === type;
+    });
+    const entity = await this.nftRepository.findOne({
+      conditions: {
+        level: level,
+        type: type,
+        status: NFT_STATUS.STORE,
+      },
+    });
+    if (!_isNull(entity)) {
+      const masterNftInfo = await this.populateNftInfo(entity);
+      storeNftInfo['id'] = masterNftInfo._id;
+    } else {
+      storeNftInfo['stock'] = 0;
+    }
+    return storeNftInfo;
   }
   async getListNftByUser(wallet: string, status: number, paginationParam: PaginateDto) {
     const conditions = { owner: wallet };
@@ -424,7 +449,7 @@ export class NftService {
       amount: price,
       type: type,
       level: level,
-      earningTime: metaData.earningTime,
+      originalStakedDays: metaData.originalStakedDays,
     };
     return result;
   }

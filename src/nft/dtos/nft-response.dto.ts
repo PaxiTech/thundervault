@@ -22,7 +22,7 @@ export class NftItem {
   level: number;
 
   @ApiProperty()
-  earningTime?: number;
+  originalStakedDays?: number;
 
   @ApiProperty()
   status?: number;
@@ -44,9 +44,6 @@ export class NftItem {
 
   @ApiProperty()
   startTime?: string;
-
-  @ApiProperty()
-  remainEarningTime?: number;
 
   @ApiProperty({ type: Date })
   createdAt?: Date;
