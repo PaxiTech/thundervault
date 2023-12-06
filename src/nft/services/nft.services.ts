@@ -182,7 +182,7 @@ export class NftService {
     });
     if (!_isNull(entity)) {
       const masterNftInfo = await this.populateNftInfo(entity);
-      storeNftInfo['id'] = masterNftInfo._id;
+      storeNftInfo['token'] = masterNftInfo.token;
     } else {
       storeNftInfo['stock'] = 0;
     }
