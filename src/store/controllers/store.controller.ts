@@ -27,7 +27,7 @@ export class StoreController {
     return result;
   }
 
-  @Post('staking')
+  @Post('buy')
   @ApiOkResponse({ type: StoreItemResponse })
   @ApiBadRequestResponse({ type: ErrorResponse })
   async buyNft(@Body() storeBuyNftDto: StoreBuyNftDto) {
