@@ -366,19 +366,19 @@ export class PoolService {
 
   public async poolInfo(wallet: string) {
     // lấy tổng số tiền quỹ cấu hình cho chức năng staking
-    const totalSystemCommissionFee = this.configService.get<number>('totalSystemCommissionFee');
+    // const totalSystemCommissionFee = this.configService.get<number>('totalSystemCommissionFee');
     // lấy tổng số tiền đã trả cho staking
     const currentTotalCommissionFeeSystem =
       await this.nftService.getCurrentTotalCommissionFeeSystem();
     // tính tổng số tiền còn lại của quỹ staking
-    const remainCommissionFee = totalSystemCommissionFee - currentTotalCommissionFeeSystem;
+    // const remainCommissionFee = totalSystemCommissionFee - currentTotalCommissionFeeSystem;
     const myCommissionFee = await this.nftService.getCurrentTotalCommissionFeeByUser(wallet);
     const totalNftStaked = await this.nftService.countAllNftStaked();
     const myTotalNftStaked = await this.nftService.countNftStakedByUser(wallet);
     const data: PoolInfo = {
-      totalSystemCommissionFee: totalSystemCommissionFee,
+      // totalSystemCommissionFee: totalSystemCommissionFee,
       currentTotalCommissionFeeSystem: currentTotalCommissionFeeSystem,
-      remainCommissionFee: remainCommissionFee,
+      // remainCommissionFee: remainCommissionFee,
       myCommissionFee: myCommissionFee,
       totalNftStaked: totalNftStaked,
       myTotalNftStaked: myTotalNftStaked,
