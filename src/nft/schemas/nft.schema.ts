@@ -5,12 +5,12 @@ import * as paginate from 'mongoose-paginate-v2';
 export type NftDocument = HydratedDocument<Nft>;
 
 export const NFT_LEVEL = {
-  NFT_LEVEL_1: 1,
-  NFT_LEVEL_2: 2,
-  NFT_LEVEL_3: 3,
-  NFT_LEVEL_4: 4,
-  NFT_LEVEL_5: 5,
-  NFT_LEVEL_6: 6,
+  NFT_LEVEL_1: 1, // bronze
+  NFT_LEVEL_2: 2, //silver
+  NFT_LEVEL_3: 3, // gold
+  NFT_LEVEL_4: 4, //platinum
+  NFT_LEVEL_5: 5, //ruby
+  NFT_LEVEL_6: 6, //diamond
 };
 export enum NFT_STATUS {
   STORE = 1, // đang trong store
@@ -27,6 +27,7 @@ export enum NFT_TYPE {
 export enum NFT_ACTION {
   market = 'market',
   staking = 'staking',
+  unStaking = 'unStaking',
   buy = 'buy',
 }
 export const STORE_OWNER = 'store';

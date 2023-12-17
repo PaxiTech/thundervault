@@ -115,4 +115,9 @@ export const Errors = {
     message: 'The nft is out of stock.',
     status: HttpStatus.NOT_FOUND,
   },
+  META_NOT_EXIST: {
+    code: 'META_NOT_EXIST',
+    message: 'The nft does not support this level.',
+    status: HttpStatus.NOT_FOUND,
+  },
 };
