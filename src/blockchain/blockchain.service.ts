@@ -38,17 +38,24 @@ export class BlockchainService {
     this.ownerNftWallet = this.configService.get<string>('ownerNftWallet');
     this.nftAddress = this.configService.get<string>('nftAddress');
     this.tdvAddress = this.configService.get<string>('tdvAddress');
-    this.providerAnkr = ethers.getDefaultProvider(
-      'https://rpc.ankr.com/bsc/5604b43661ba48f6ab7ef4b9970d5cd9b4fdb42357944ed24ca44374d640c604',
-    );
+    const isMainnet = this.configService.get<string>('mainnet');
+    if (isMainnet) {
+      this.providerAnkr = ethers.getDefaultProvider(
+        'https://rpc.ankr.com/bsc/5604b43661ba48f6ab7ef4b9970d5cd9b4fdb42357944ed24ca44374d640c604',
+      );
+      this.providerBsc = ethers.getDefaultProvider('https://bsc-dataseed.binance.org/');
+    } else {
+      this.providerAnkr = ethers.getDefaultProvider(
+        'https://data-seed-prebsc-1-s1.binance.org:8545/',
+      );
+      this.providerBsc = ethers.getDefaultProvider(
+        'https://data-seed-prebsc-1-s1.binance.org:8545/',
+      );
+    }
 
-    // mainnet
-    // this.providerBsc = ethers.getDefaultProvider('https://bsc-dataseed.binance.org/');
-    // testnet
-    //this.providerBsc = ethers.getDefaultProvider('https://data-seed-prebsc-1-s1.binance.org:8545/');
     this.savePresave();
-    // this.onWatchNft();
-    // this.getRateTokenUsdt();
+    this.onWatchNft();
+    this.getRateTokenUsdt();
   }
   async savePresave() {
     const contract = new Contract(this.usdtAddress, this.abiTransferEvent, this.providerAnkr);
@@ -192,7 +199,7 @@ export class BlockchainService {
     const pancakeRouterContract = new ethers.Contract(
       pancakeRouterAddress,
       pancakeRouterAbi,
-      this.providerAnkr,
+      this.providerBsc,
     );
 
     const amountIn = ethers.parseUnits('1');

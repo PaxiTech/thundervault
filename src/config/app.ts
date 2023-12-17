@@ -20,4 +20,5 @@ export default () => ({
   configSecretKey:
     process.env.SECRET_KEY || 'nJVvIsM2KJY4HRQVL1lwZ5gBHo3TAcz/GHOWJaN90HhOyN2a7rCPI9iJqyU=',
   nft_resource: process.env.NFT_RESOURCE || './asset/resource/',
+  mainnet: process.env.MAINNET || true,
 });
