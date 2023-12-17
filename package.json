@@ -37,14 +37,15 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "ethereumjs-util": "^7.1.5",
-    "ethers": "^6.8.0",
+    "ethers": "^6.9.0",
     "moment-timezone": "^0.5.43",
     "mongoose": "^7.6.2",
     "mongoose-paginate-v2": "^1.7.4",
     "nestjs-command": "^3.1.4",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.2.0"
+    "rxjs": "^7.2.0",
+    "web3": "^1.10.3"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",
