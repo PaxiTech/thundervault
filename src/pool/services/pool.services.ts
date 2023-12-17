@@ -16,7 +16,7 @@ import {
   totalDirectFeeConfig,
   stakingFeeConfig,
   totalStakingFeeConfig,
-  STAKING_FEE_PER_DAY,
+  stakingFeePerDay,
 } from '@src/pool/contracts/pool-config';
 import { COMMISSION_TYPE } from '@src/nft/schemas/commissionfee.schema';
 import { PoolInfo } from '../dtos/pool-response.dto';
@@ -57,6 +57,11 @@ export class PoolService {
   }
   public async processStaking(stakingData: IPool): Promise<any> {
     const { from, nft } = stakingData;
+    //chuyển đổi từ level nft sang level user.
+    const tokenLevel = this.helperService.getNftRankFromLevel(stakingData.level);
+    //set user level theo nft level
+    await this.userService.updateUserLevel(from, tokenLevel);
+
     const userInfo = await this.userService.getUserInfo(from, { getRefCode: true });
     const nftInfo = await this.nftService.getNftInfo(nft);
     const refCode = userInfo.refCode;
@@ -86,10 +91,6 @@ export class PoolService {
    */
   public async processUserCommissionFee(stakingData: IPool, UserInfo: UserItem) {
     const { from, nft, price } = stakingData;
-    const tokenLevel = stakingData.level;
-    const wallet = UserInfo.wallet;
-    //update user level if sử dụng user level = nft level
-    await this.userService.updateUserLevel(wallet, tokenLevel);
     const {
       refLevel1,
       refLevel2,
@@ -130,9 +131,6 @@ export class PoolService {
       const userRefId = allRefUserList[i]; //user id ứng với ref level
       const refLevel = i; //relevel
       const refConfigKey = `F${i}`; //key config
-      console.log('userRefId', userRefId);
-      console.log('refLevel', refLevel);
-      console.log('refConfigKey', refConfigKey);
       nftCommissionFee = await this.processDirectCommissionFeeByLevel({
         from: from,
         userWallet: userRefId,
@@ -160,9 +158,6 @@ export class PoolService {
       const userRefId = allRefUserList[i]; //user id ứng với ref level
       const refLevel = i; //relevel
       const refConfigKey = `F${i}`; //key config
-      console.log('userRefId', userRefId);
-      console.log('refLevel', refLevel);
-      console.log('refConfigKey', refConfigKey);
       nftStakingCommissionFee = await this.processStakingCommissionFeeByLevel({
         from: from,
         userWallet: userRefId,
@@ -366,19 +361,19 @@ export class PoolService {
 
   public async poolInfo(wallet: string) {
     // lấy tổng số tiền quỹ cấu hình cho chức năng staking
-    const totalSystemCommissionFee = this.configService.get<number>('totalSystemCommissionFee');
+    // const totalSystemCommissionFee = this.configService.get<number>('totalSystemCommissionFee');
     // lấy tổng số tiền đã trả cho staking
     const currentTotalCommissionFeeSystem =
       await this.nftService.getCurrentTotalCommissionFeeSystem();
     // tính tổng số tiền còn lại của quỹ staking
-    const remainCommissionFee = totalSystemCommissionFee - currentTotalCommissionFeeSystem;
+    // const remainCommissionFee = totalSystemCommissionFee - currentTotalCommissionFeeSystem;
     const myCommissionFee = await this.nftService.getCurrentTotalCommissionFeeByUser(wallet);
     const totalNftStaked = await this.nftService.countAllNftStaked();
     const myTotalNftStaked = await this.nftService.countNftStakedByUser(wallet);
     const data: PoolInfo = {
-      totalSystemCommissionFee: totalSystemCommissionFee,
+      // totalSystemCommissionFee: totalSystemCommissionFee,
       currentTotalCommissionFeeSystem: currentTotalCommissionFeeSystem,
-      remainCommissionFee: remainCommissionFee,
+      // remainCommissionFee: remainCommissionFee,
       myCommissionFee: myCommissionFee,
       totalNftStaked: totalNftStaked,
       myTotalNftStaked: myTotalNftStaked,
@@ -423,7 +418,8 @@ export class PoolService {
       // lấy giá trị config cho từng level ref.
 
       // tính ra số tiền hoa hồng nhận được.
-      let earningValue = this.helperService.calculateEarningValue(price, STAKING_FEE_PER_DAY);
+      const staking_fee_per_day = stakingFeePerDay[userInfo.level];
+      let earningValue = this.helperService.calculateEarningValue(price, staking_fee_per_day);
       earningValue =
         maxValueCommissionFeeAvailable - earningValue > 0
           ? earningValue

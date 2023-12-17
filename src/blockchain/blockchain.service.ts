@@ -120,9 +120,7 @@ export class BlockchainService {
         .getFunction('getTokenLevel')(tokenId)
         .then((level) => async () => {
           //get cache price nft
-
-          const type = 1;
-          const cache_key = `${from}-${level}-${type}`;
+          const cache_key = `${from}-${level}`;
           const price = await this.nftService.cacheGetKey(cache_key);
           //kiểm tra xem user có tồn tại cache không.
           if (price) {
@@ -173,7 +171,7 @@ export class BlockchainService {
         const actionDto: ActionDto = {
           fromWallet: owner,
           nft: tokenId,
-          action: NFT_ACTION.staking,
+          action: NFT_ACTION.unStaking,
           status: NFT_STATUS.STAKING,
         };
         const updateData = {

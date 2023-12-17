@@ -15,4 +15,7 @@ export class UtilHelperService {
   public calculateEarningValue(price: number, currentBrokerageFeeStaking: any) {
     return price * currentBrokerageFeeStaking;
   }
+  public getNftRankFromLevel(level: number): number {
+    return Math.ceil(level / 3);
+  }
 }

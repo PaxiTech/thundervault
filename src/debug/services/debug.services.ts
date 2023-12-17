@@ -9,9 +9,16 @@ export class DebugService {
   public async addNftToMarket(actionDto: ActionDto) {
     return await this.nftService.addNftToMarket(actionDto);
   }
+  public async generateNft(token: string, level: number) {
+    return await this.nftService.generateNft('', token, level);
+  }
 
   public async stakingNft(actionDto: ActionDto) {
     return await this.nftService.stakingNft(actionDto);
+  }
+
+  public async unStakingNft(actionDto: ActionDto) {
+    return await this.nftService.unStakingNft(actionDto);
   }
 
   public async buyNftFromStore(actionDto: ActionDto) {

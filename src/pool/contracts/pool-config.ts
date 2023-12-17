@@ -137,4 +137,11 @@ export const stakingFeeConfig = {
 
 export const totalStakingFeeConfig = 20.75 / 100; // 20.75 %
 
-export const STAKING_FEE_PER_DAY = 2 / 100; //2 % cho ngày.
+export const stakingFeePerDay = {
+  [BRONZE]: 8 / 100, //8%
+  [SILVER]: 10 / 100, // 10%
+  [GOLD]: 11 / 100, //11%
+  [PLATINUM]: 12 / 100, //12%
+  [RUBY]: 13 / 100, //13%
+  [DIAMOND]: 14 / 100, // 14%
+};

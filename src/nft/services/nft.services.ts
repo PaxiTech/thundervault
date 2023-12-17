@@ -13,9 +13,10 @@ import * as fs from 'fs';
 import { get as _get, isNull as _isNull } from 'lodash';
 import { ActionDto } from '../dtos/action.dto';
 import { CommissionFeeRepository } from '../repositories/commissionfee.repository';
-import { CommissionFeeDocument } from '../schemas/commissionfee.schema';
 import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { UtilHelperService } from '@src/utils/helper.service';
+import { UserService } from '@src/user/services/user.services';
 
 @Injectable()
 export class NftService {
@@ -23,32 +24,26 @@ export class NftService {
     private nftRepository: NftRepository,
     private commissionFeeRepository: CommissionFeeRepository,
     private configService: ConfigService,
+    private helperService: UtilHelperService,
+    private userService: UserService,
     @Inject(CACHE_MANAGER) private cacheService: Cache,
   ) {}
 
-  public async generateNft(
-    from: string,
-    token: string,
-    level: number,
-    type?: number,
-  ): Promise<any> {
-    if (!type) {
-      type = Math.floor(Math.random() * 3) + 1;
-    }
+  public async generateNft(from: string, token: string, level: number): Promise<any> {
     const nftInfo = await this.getNftInfo(token, false);
-    const metaData = this.getMetadata(level, type);
+    const metaData = await this.getMetadata(level);
     if (nftInfo) {
       return nftInfo;
     } else {
       //lưu nft master
+      console.log('generate new nft', token);
       const nftEntity = await this.nftRepository.create({
         token: token,
         owner: STORE_OWNER,
         level: level,
-        type: type,
         status: NFT_STATUS.STORE,
         amount: metaData?.amount,
-        originalStakedDays: metaData?.originalStakedDays,
+        originalStakedDays: metaData?.originalStakedDays ?? 0,
       });
       // tạo file json cho nft
       this.saveNFTAsJson(token, metaData);
@@ -108,11 +103,17 @@ export class NftService {
     return nftInfo;
   }
 
-  public getMetadata(nftLevel: number, type: number) {
-    if (metaDataSimple[nftLevel]) {
-      return metaDataSimple[nftLevel].find((item) => {
-        return item.type === type;
-      });
+  public getMetadata(nftLevel: number) {
+    const nftRank = this.helperService.getNftRankFromLevel(nftLevel);
+    if (metaDataSimple[nftRank]) {
+      return (
+        metaDataSimple[nftRank].find((item) => {
+          return parseInt(item.level) == nftLevel;
+        }) ?? {}
+      );
+    } else {
+      const { code, message, status } = Errors.META_NOT_EXIST;
+      throw new AppException(code, message, status);
     }
   }
   /**
@@ -121,7 +122,7 @@ export class NftService {
    * @returns
    */
   public populateNftInfo(nft: NftDocument) {
-    const metaData = this.getMetadata(nft.level, nft.type);
+    const metaData = this.getMetadata(nft.level);
     const data = {
       _id: _get(nft, '_id'),
       token: nft.token,
@@ -130,7 +131,6 @@ export class NftService {
       level: nft.level,
       originalStakedDays: nft.originalStakedDays,
       status: nft.status,
-      type: nft.type,
       amount: nft.amount,
       stakedDays: nft.stakedDays,
       price: nft.price,
@@ -151,7 +151,6 @@ export class NftService {
           name: item.name,
           description: item.description,
           image: item.image,
-          type: item.type,
           level: item?.level,
           amount: item.amount,
           price: (item.amount * rate).toFixed(2),
@@ -165,23 +164,23 @@ export class NftService {
     });
     return list;
   }
-  public async getDetailStore(type: number, level: number, rate: number) {
+  public async getDetailStore(level: number, rate: number) {
+    const rank = this.helperService.getNftRankFromLevel(level);
     const storeList = await this.getStoreList(rate);
-    if (!storeList[level]) {
+    if (!storeList[rank]) {
       return [];
     }
-    const storeNftInfo = storeList[level].find((item) => {
-      return item.type === type;
+    const storeNftInfo = storeList[rank].find((item) => {
+      return item.level === level;
     });
     const entity = await this.nftRepository.findOne({
       conditions: {
         level: level,
-        type: type,
         status: NFT_STATUS.STORE,
       },
     });
     if (!_isNull(entity)) {
-      const masterNftInfo = await this.populateNftInfo(entity);
+      const masterNftInfo = this.populateNftInfo(entity);
       storeNftInfo['token'] = masterNftInfo.token;
     } else {
       storeNftInfo['stock'] = 0;
@@ -279,9 +278,9 @@ export class NftService {
     const { fromWallet, nft, action } = actionDto;
     let nftInfo = await this.getNftInfo(nft);
     let isValidAction = false;
-    //staking action
+    //unStaking action
     if (
-      action === NFT_ACTION.staking &&
+      action === NFT_ACTION.unStaking &&
       nftInfo.status === NFT_STATUS.STAKING &&
       nftInfo.owner === stakingOwnerWallet &&
       nftInfo.preOwner === fromWallet
@@ -302,6 +301,13 @@ export class NftService {
       };
       const options = { new: true };
       nftInfo = await this.nftRepository.findOneAndUpdate(conditions, dataUpdate, options);
+
+      //tìm level cao nhất của user hiện tại sau khi unstaking
+      const maxCurrentStakingLevel = await this.getMaxCurrentStakingLevelByUser(fromWallet);
+      const tokenLevel =
+        maxCurrentStakingLevel === 0 ? 0 : this.helperService.getNftRankFromLevel(nftInfo.level);
+      //cập nhập lại level cho user sau khi unstaking
+      await this.userService.updateUserLevel(fromWallet, tokenLevel);
       return this.populateNftInfo(nftInfo);
     }
   }
@@ -418,14 +424,9 @@ export class NftService {
   public async createCommissionFee(data) {
     return await this.commissionFeeRepository.create(data);
   }
-  public async getNftInfoToBuyNft(
-    wallet: string,
-    level: number,
-    type: number,
-    rate: number,
-  ): Promise<any> {
-    const metaData = this.getMetadata(level, type);
-    const cache_key = `${wallet}-${level}-${type}`;
+  public async getNftInfoToBuyNft(wallet: string, level: number, rate: number): Promise<any> {
+    const metaData = this.getMetadata(level);
+    const cache_key = `${wallet}-${level}`;
     const price = metaData.amount * rate;
     this.cacheSetKey(cache_key, price);
     const toWallet = this.configService.get<string>('nftOwnerWallet');
@@ -433,7 +434,6 @@ export class NftService {
     const conditions = {
       owner: STORE_OWNER,
       level: level,
-      type: type,
       status: NFT_STATUS.STORE,
     };
     const entity = await this.nftRepository.findOne({
@@ -447,7 +447,6 @@ export class NftService {
     const result = {
       toWallet: toWallet,
       amount: price,
-      type: type,
       level: level,
       originalStakedDays: metaData.originalStakedDays,
     };
@@ -512,5 +511,17 @@ export class NftService {
       token: token,
     };
     return result;
+  }
+
+  public async getMaxCurrentStakingLevelByUser(wallet: string) {
+    const conditions = { owner: wallet, status: NFT_STATUS.STAKING };
+    const entity = await this.nftRepository.findOne({
+      conditions: conditions,
+      options: { sort: { level: -1 } },
+    });
+    if (!entity) {
+      return entity.level;
+    }
+    return 0;
   }
 }
