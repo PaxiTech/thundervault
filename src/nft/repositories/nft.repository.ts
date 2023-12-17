@@ -86,4 +86,17 @@ export class NftRepository extends AbstractRepository<NftDocument> {
 
     return record.count;
   }
+  async getStockNft(): Promise<any> {
+    const data = await this.aggregate([
+      {
+        $match: {
+          owner: STORE_OWNER,
+          status: NFT_STATUS.STORE, // điệu kiện nft đang staking
+        },
+      },
+      { $group: { _id: '$level', count: { $sum: 1 } } },
+    ]).exec();
+
+    return data;
+  }
 }
