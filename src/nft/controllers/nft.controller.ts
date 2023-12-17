@@ -11,13 +11,13 @@ import { NFT_ACTION } from '@src/nft/schemas/nft.schema';
 export class NftController {
   constructor(private nftService: NftService) {}
 
-  // @Get(':level/:token.json')
-  // @ApiOkResponse({ type: NftItemResponse })
-  // @ApiBadRequestResponse({ type: ErrorResponse })
-  // async generateNft(@Param('level') level: number, @Param('token') token: string) {
-  //   const result = await this.nftService.generateNft(token, level);
-  //   return result;
-  // }
+  @Get(':level/:token.json')
+  @ApiOkResponse({ type: NftItemResponse })
+  @ApiBadRequestResponse({ type: ErrorResponse })
+  async generateNft(@Param('level') level: number, @Param('token') token: string) {
+    const result = await this.nftService.generateNft('', token, level);
+    return result;
+  }
 
   @Post('detail')
   @ApiOkResponse({ type: NftItemResponse })
