@@ -22,12 +22,13 @@ export class BlockchainService {
   abiNft = [
     'function getTokenLevel(uint256) public view returns (uint256)',
     'event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)',
-    'event Staked(uint256 indexed tokenId, address indexed address)',
-    'event Unstaked(uint256 indexed tokenId, address indexed address)',
+    'event Staked(uint256 indexed tokenId, address indexed owner)',
+    'event Unstaked(uint256 indexed tokenId, address indexed owner)',
     'function getStakeInfo(uint256 tokenId) public view returns (address owner, uint256 startTime, uint256 stakedDays)',
   ];
   providerAnkr;
   providerBsc;
+  stakingOwnerWallet;
   constructor(
     private configService: ConfigService,
     private exchangeService: ExchangeService,
@@ -39,6 +40,9 @@ export class BlockchainService {
     this.ownerNftWallet = this.configService.get<string>('ownerNftWallet');
     this.nftAddress = this.configService.get<string>('nftAddress');
     this.tdvAddress = this.configService.get<string>('tdvAddress');
+
+    this.stakingOwnerWallet = this.configService.get<string>('stakingOwnerWallet');
+
     const isMainnet = this.configService.get<string>('mainnet');
     if (isMainnet) {
       console.log('mainnet');
@@ -56,9 +60,9 @@ export class BlockchainService {
       );
     }
 
-    this.savePresave();
-    // this.onWatchNft();
-    this.getRateTokenUsdt2();
+    // this.savePresave();
+    this.onWatchNft();
+    // this.getRateTokenUsdt();
   }
   async savePresave() {
     const contract = new Contract(this.usdtAddress, this.abiTransferEvent, this.providerAnkr);
@@ -122,7 +126,7 @@ export class BlockchainService {
         // TODO: delete nft
         // xóa luôn json file không hay chỉ cần đưa về store?
         // tạm thời trả về store.
-        this.nftService.updateNftOwner(tokenId, STORE_OWNER, NFT_STATUS.STORE);
+        this.nftService.updateNftOwner(tokenId, '0x0000000000000000000000000000000000000000', 0);
       }
 
       //TODO: update nft owner = to
@@ -141,9 +145,9 @@ export class BlockchainService {
         });
     });
 
-    contract.on('Staked', (tokenId, address, event) => {
+    contract.on('Staked', (tokenId, owner, event) => {
       contract.getStakeInfo(tokenId).then((info) => async () => {
-        const owner = info[0];
+        // const owner = info[0];
         const startTime = info[1];
         const stakedDays = info[2];
 
@@ -162,7 +166,7 @@ export class BlockchainService {
         const nftInfo = await this.nftService.stakingNft(actionDto, updateData);
         const poolData: IPool = {
           from: owner,
-          to: address,
+          to: this.stakingOwnerWallet,
           nft: tokenId,
           startTime: startTime,
           chargeTime: startTime,
@@ -197,7 +201,7 @@ export class BlockchainService {
   async getRateTokenUsdt(): Promise<number> {
     const pancakeRouterAddress = '0x10ED43C718714eb63d5aA57B78B54704E256024E';
     const pancakeRouterAbi = [
-      'function getAmountsOut(uint256 amountIn, address[] memory path) internal view returns (uint256[] memory amounts)',
+      'function getAmountsOut(uint256 amountIn, address[] memory path) public view returns (uint256[] memory amounts)',
     ];
     const pancakeRouterContract = new ethers.Contract(
       pancakeRouterAddress,
@@ -218,6 +222,8 @@ export class BlockchainService {
   }
 
   async getRateTokenUsdt2() {
+    console.log(Web3);
+
     const provider = new Web3.providers.HttpProvider('https://bsc-dataseed.binance.org/');
 
     const web3 = new Web3(provider);
