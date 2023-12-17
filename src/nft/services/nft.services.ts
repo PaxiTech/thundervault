@@ -142,8 +142,13 @@ export class NftService {
     };
     return data;
   }
-  async getStoreList(rate: number) {
+  async getStoreList(rate: number): Promise<any> {
     const storeList = { ...metaDataSimple };
+    const numOfStock = await this.getStockNft();
+    const stockList = numOfStock.reduce((acc, obj) => {
+      acc[obj._id] = obj.count;
+      return acc;
+    }, {});
     const list = {};
     Object.keys(storeList).map((key) => {
       list[key] = storeList[key]?.map((item) => {
@@ -158,7 +163,7 @@ export class NftService {
           stakedDays: 0,
           remainStakedDays: item.originalStakedDays,
           status: NFT_STATUS.STORE,
-          stock: 10, // sẽ tính số lượng còn lại sau.
+          stock: stockList?.[item.level] ?? 0,
         };
       });
     });
@@ -483,6 +488,11 @@ export class NftService {
   public async countAllNftStaked() {
     return await this.nftRepository.countAllNftStaked();
   }
+
+  public async getStockNft() {
+    return await this.nftRepository.getStockNft();
+  }
+
   async getAllNftStaking(): Promise<any> {
     const conditions = { status: NFT_STATUS.STAKING };
     const nftList = await this.nftRepository.find({
