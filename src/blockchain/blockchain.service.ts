@@ -58,7 +58,7 @@ export class BlockchainService {
 
     this.savePresave();
     // this.onWatchNft();
-    this.getRateTokenUsdt2();
+    // this.getRateTokenUsdt2();
   }
   async savePresave() {
     const contract = new Contract(this.usdtAddress, this.abiTransferEvent, this.providerAnkr);
