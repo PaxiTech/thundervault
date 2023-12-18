@@ -14,7 +14,7 @@ export default () => ({
   marketOwnerWallet: process.env.MARKETOWNERWALLET || '',
   systemWallet: process.env.SYSTEMWALLET || '',
   f0Wallet: process.env.F0WALLET || '',
-  totalSystemCommissionFee: process.env.TOTALSYSTEMCOMMISSIONFEE || 0,
+  totalSystemCommissionRoi: process.env.TOTALSYSTEMCOMMISSIONFEE || 0,
   nftAddress: process.env.NFT_ADDRESS || '',
   tdvAddress: process.env.TDV_ADDRESS || '',
   ownerNftWallet: process.env.OWNERNFTWALLET || '',

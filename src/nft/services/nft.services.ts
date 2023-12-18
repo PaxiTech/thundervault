@@ -12,7 +12,7 @@ import { StoreListDto } from '@src/store/dtos/list.dto';
 import * as fs from 'fs';
 import { get as _get, isNull as _isNull } from 'lodash';
 import { ActionDto } from '../dtos/action.dto';
-import { CommissionFeeRepository } from '../repositories/commissionfee.repository';
+import { CommissionRoiRepository } from '../repositories/commissionfee.repository';
 import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { UtilHelperService } from '@src/utils/helper.service';
@@ -22,7 +22,7 @@ import { UserService } from '@src/user/services/user.services';
 export class NftService {
   constructor(
     private nftRepository: NftRepository,
-    private commissionFeeRepository: CommissionFeeRepository,
+    private commissionFeeRepository: CommissionRoiRepository,
     private configService: ConfigService,
     private helperService: UtilHelperService,
     private userService: UserService,
@@ -217,7 +217,7 @@ export class NftService {
   }
 
   async getAllNftByUser(wallet: string, status: number, getAll = false) {
-    const conditions = { owner: wallet };
+    const conditions = { $or: [{ owner: wallet }, { preOwner: wallet }] };
     if (status && !getAll) {
       conditions['status'] = status;
     }
@@ -395,7 +395,7 @@ export class NftService {
   }
 
   async getNftByUser(wallet: string) {
-    const conditions = { owner: wallet };
+    const conditions = { $or: [{ owner: wallet }, { preOwner: wallet }] };
     const nftList = await this.nftRepository.find({ conditions: conditions });
     const list = nftList.map((item) => {
       return this.populateNftInfo(item);
@@ -409,22 +409,22 @@ export class NftService {
     return totalAmount * 4; // 4 lần tổng giá trị staking
   }
 
-  public async getCurrentTotalCommissionFeeByUser(wallet: string) {
-    return await this.commissionFeeRepository.getTotalCommissionFeeStakingByUser(wallet);
+  public async getCurrentTotalCommissionRoiByUser(wallet: string) {
+    return await this.commissionFeeRepository.getTotalCommissionRoiStakingByUser(wallet);
   }
 
-  public async getCurrentTotalCommissionFeeSystem() {
-    return await this.commissionFeeRepository.getCurrentTotalCommissionFeeSystem();
+  public async getCurrentTotalCommissionRoiSystem() {
+    return await this.commissionFeeRepository.getCurrentTotalCommissionRoiSystem();
   }
 
-  public async getAvailableCommissionFeeByUser(wallet: string) {
-    const totalCommissionFee = await this.getCurrentTotalCommissionFeeByUser(wallet);
-    const maxCommissionFee = await this.getMaxValueStakingByUser(wallet);
-    return maxCommissionFee - totalCommissionFee;
+  public async getAvailableCommissionRoiByUser(wallet: string) {
+    const totalCommissionRoi = await this.getCurrentTotalCommissionRoiByUser(wallet);
+    const maxCommissionRoi = await this.getMaxValueStakingByUser(wallet);
+    return maxCommissionRoi - totalCommissionRoi;
   }
 
   //history get commission fee
-  public async createCommissionFee(data) {
+  public async createCommissionRoi(data) {
     return await this.commissionFeeRepository.create(data);
   }
   public async getNftInfoToBuyNft(wallet: string, level: number, rate: number): Promise<any> {

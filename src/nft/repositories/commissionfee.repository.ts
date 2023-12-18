@@ -3,13 +3,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import AbstractRepository from '@src/common/abstracts/repository.abstract';
 import { get as _get } from 'lodash';
 import { PaginateModel } from 'mongoose';
-import { CommissionFee, CommissionFeeDocument } from '../schemas/commissionfee.schema';
+import { CommissionRoi, CommissionRoiDocument } from '../schemas/commissionfee.schema';
 @Injectable()
-export class CommissionFeeRepository extends AbstractRepository<CommissionFeeDocument> {
-  constructor(@InjectModel(CommissionFee.name) model: PaginateModel<CommissionFeeDocument>) {
+export class CommissionRoiRepository extends AbstractRepository<CommissionRoiDocument> {
+  constructor(@InjectModel(CommissionRoi.name) model: PaginateModel<CommissionRoiDocument>) {
     super(model);
   }
-  async getTotalCommissionFeeStakingByUser(wallet: string): Promise<number> {
+  async getTotalCommissionRoiStakingByUser(wallet: string): Promise<number> {
     const data = await this.aggregate([
       {
         $match: {
@@ -30,7 +30,7 @@ export class CommissionFeeRepository extends AbstractRepository<CommissionFeeDoc
 
     return record.amountFee;
   }
-  async getCurrentTotalCommissionFeeSystem(): Promise<number> {
+  async getCurrentTotalCommissionRoiSystem(): Promise<number> {
     const data = await this.aggregate([
       {
         $group: {

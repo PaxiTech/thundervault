@@ -32,11 +32,11 @@ export class UserController {
       preRefCode: userInfo.myRefCode,
     });
     const allNftStaked = await this.nftService.getAllNftByUser(wallet, NFT_STATUS.STAKING);
-    const myCommissionFee = await this.nftService.getCurrentTotalCommissionFeeByUser(wallet);
+    const myCommissionRoi = await this.nftService.getCurrentTotalCommissionRoiByUser(wallet);
     const myTotalNftStaked = await this.nftService.countNftStakedByUser(wallet);
     const pool = {
       nft: allNftStaked,
-      myCommissionFee: myCommissionFee,
+      myCommissionRoi: myCommissionRoi,
       myTotalNftStaked: myTotalNftStaked,
     };
     return { ...userInfo, presale: { ...summary }, nft: myNft, pool: pool };
