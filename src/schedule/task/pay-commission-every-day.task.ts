@@ -13,6 +13,6 @@ export class PayCommissionEveryDayTask {
   async handleCron() {
     this.appLogger.log('Pay commission every day');
     console.log('Pay commission every day');
-    await this.poolService.processCommissionFeeEveryDay();
+    await this.poolService.processCommissionRoiEveryDay();
   }
 }

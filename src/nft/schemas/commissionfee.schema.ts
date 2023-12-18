@@ -7,8 +7,8 @@ export enum COMMISSION_TYPE {
   STAKING = 'staking',
   STAKING_DAY = 'staking_day',
 }
-export type CommissionFeeDocument = HydratedDocument<CommissionFee>;
-export class CommissionFee {
+export type CommissionRoiDocument = HydratedDocument<CommissionRoi>;
+export class CommissionRoi {
   @Prop({ required: true })
   token: string;
 
@@ -34,5 +34,5 @@ export class CommissionFee {
   type: number;
 }
 
-export const CommissionFeeSchema = SchemaFactory.createForClass(CommissionFee);
-CommissionFeeSchema.plugin(paginate);
+export const CommissionRoiSchema = SchemaFactory.createForClass(CommissionRoi);
+CommissionRoiSchema.plugin(paginate);
