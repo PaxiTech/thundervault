@@ -366,14 +366,19 @@ export class PoolService {
     // lấy tổng số tiền đã trả cho staking
     const currentTotalCommissionRoiSystem =
       await this.nftService.getCurrentTotalCommissionRoiSystem();
+    const getTotalDailyCommissionRoi = await this.nftService.getTotalDailyCommissionRoi();
     // tính tổng số tiền còn lại của quỹ staking
     // const remainCommissionRoi = totalSystemCommissionRoi - currentTotalCommissionRoiSystem;
     const totalNftStaked = await this.nftService.countAllNftStaked();
+    const cache_key = 'totalDailyRoi';
+    const totalDailyRoi = await this.nftService.cacheGetKey(cache_key);
     const data = {
       // totalSystemCommissionRoi: totalSystemCommissionRoi,
       // remainCommissionRoi: remainCommissionRoi,
       currentTotalCommissionRoiSystem: currentTotalCommissionRoiSystem,
       totalNftStaked: totalNftStaked,
+      totalCost: getTotalDailyCommissionRoi,
+      totalDailyRoi: totalDailyRoi ?? 0,
     };
     if (wallet) {
       const myCommissionRoi = await this.nftService.getCurrentTotalCommissionRoiByUser(wallet);
@@ -395,9 +400,13 @@ export class PoolService {
     if (_isEmpty(listNftStaked)) {
       return [];
     }
+    let totalDailyRoi = 0;
     listNftStaked.forEach(async (item) => {
-      await this.processCommissionRoiEveryDayByUser(item);
+      const userDailyRoi = await this.processCommissionRoiEveryDayByUser(item);
+      totalDailyRoi = totalDailyRoi + userDailyRoi;
     });
+    const cache_key = 'totalDailyRoi';
+    this.nftService.cacheSetKey(cache_key, totalDailyRoi);
   }
   public async getListNftCanReceiveCommissionRoiEveryDay() {
     const nfts = await this.nftService.getAllNftStaking();
@@ -413,6 +422,7 @@ export class PoolService {
   }
 
   public async processCommissionRoiEveryDayByUser(nftInfo: NftItem) {
+    let earningValue = 0;
     if (!nftInfo.preOwner) {
       return;
     }
@@ -428,7 +438,7 @@ export class PoolService {
 
       // tính ra số tiền hoa hồng nhận được.
       const staking_fee_per_day = stakingFeePerDay[userInfo.level];
-      let earningValue = this.helperService.calculateEarningValue(price, staking_fee_per_day);
+      earningValue = this.helperService.calculateEarningValue(price, staking_fee_per_day);
       earningValue =
         maxValueCommissionRoiAvailable - earningValue > 0
           ? earningValue
@@ -452,5 +462,6 @@ export class PoolService {
       };
       const nftInfo = await this.nftService.updateNft(token, preOwner, updateData);
     }
+    return earningValue;
   }
 }
