@@ -21,8 +21,8 @@ export class StoreController {
   @ApiOkResponse({ type: StoreListResponse })
   @ApiBadRequestResponse({ type: ErrorResponse })
   async getStoreList() {
-    //const rate = await this.blockchainService.getRateTokenUsdt();
-    const rate = 1;
+    const rate = await this.blockchainService.getRateTokenUsdt();
+    // const rate = 1;
     const result = await this.nftService.getStoreList(rate);
     return result;
   }
@@ -32,8 +32,8 @@ export class StoreController {
   @ApiBadRequestResponse({ type: ErrorResponse })
   async buyNft(@Body() storeBuyNftDto: StoreBuyNftDto) {
     const { wallet, level } = storeBuyNftDto;
-    // const rate = await this.blockchainService.getRateTokenUsdt();
-    const rate = 1;
+    const rate = await this.blockchainService.getRateTokenUsdt();
+    // const rate = 1;
     const result = await this.nftService.getNftInfoToBuyNft(wallet, level, rate);
     return result;
   }
@@ -43,8 +43,8 @@ export class StoreController {
   @ApiBadRequestResponse({ type: ErrorResponse })
   async detail(@Body() storeBuyNftDto: StoreBuyNftDto) {
     const { level } = storeBuyNftDto;
-    // const rate = await this.blockchainService.getRateTokenUsdt();
-    const rate = 1;
+    const rate = await this.blockchainService.getRateTokenUsdt();
+    // const rate = 1;
     const result = await this.nftService.getDetailStore(level, rate);
     return result;
   }
