@@ -54,10 +54,10 @@ export class PoolInfo {
   // remainCommissionFee: number;
 
   @ApiProperty()
-  myTotalNftStaked: number;
+  myTotalNftStaked?: number;
 
   @ApiProperty()
-  myCommissionFee: number;
+  myCommissionFee?: number;
 }
 export class PoolInfoResponse {
   @ApiProperty()
