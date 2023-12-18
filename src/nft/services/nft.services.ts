@@ -417,6 +417,10 @@ export class NftService {
     return await this.commissionFeeRepository.getCurrentTotalCommissionRoiSystem();
   }
 
+  public async getTotalDailyCommissionRoi() {
+    return await this.commissionFeeRepository.getTotalDailyCommissionRoi();
+  }
+
   public async getAvailableCommissionRoiByUser(wallet: string) {
     const totalCommissionRoi = await this.getCurrentTotalCommissionRoiByUser(wallet);
     const maxCommissionRoi = await this.getMaxValueStakingByUser(wallet);
@@ -429,7 +433,7 @@ export class NftService {
   }
   public async getNftInfoToBuyNft(wallet: string, level: number, rate: number): Promise<any> {
     const metaData = this.getMetadata(level);
-    const cache_key = `${wallet}-${level}`;
+    const cache_key = `${wallet.toLowerCase()}-${level}`;
     const price = metaData.amount * rate;
     this.cacheSetKey(cache_key, price);
     const toWallet = this.configService.get<string>('nftOwnerWallet');
