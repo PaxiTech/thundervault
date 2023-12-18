@@ -21,6 +21,7 @@ import {
 import { COMMISSION_TYPE } from '@src/nft/schemas/commissionfee.schema';
 import { PoolInfo } from '../dtos/pool-response.dto';
 import { NftItem } from '@src/nft/dtos/nft-response.dto';
+import { NFT_STATUS } from '@src/nft/schemas/nft.schema';
 
 @Injectable()
 export class PoolService {
@@ -367,17 +368,25 @@ export class PoolService {
       await this.nftService.getCurrentTotalCommissionFeeSystem();
     // tính tổng số tiền còn lại của quỹ staking
     // const remainCommissionFee = totalSystemCommissionFee - currentTotalCommissionFeeSystem;
-    const myCommissionFee = await this.nftService.getCurrentTotalCommissionFeeByUser(wallet);
     const totalNftStaked = await this.nftService.countAllNftStaked();
-    const myTotalNftStaked = await this.nftService.countNftStakedByUser(wallet);
-    const data: PoolInfo = {
+    const data = {
       // totalSystemCommissionFee: totalSystemCommissionFee,
-      currentTotalCommissionFeeSystem: currentTotalCommissionFeeSystem,
       // remainCommissionFee: remainCommissionFee,
-      myCommissionFee: myCommissionFee,
+      currentTotalCommissionFeeSystem: currentTotalCommissionFeeSystem,
       totalNftStaked: totalNftStaked,
-      myTotalNftStaked: myTotalNftStaked,
     };
+    if (wallet) {
+      const myCommissionFee = await this.nftService.getCurrentTotalCommissionFeeByUser(wallet);
+      const myTotalNftStaked = await this.nftService.countNftStakedByUser(wallet);
+      const allNftStaked = await this.nftService.getAllNftByUser(wallet, NFT_STATUS.STAKING);
+      const userPoolInfo = {
+        myCommissionFee: myCommissionFee,
+        myTotalNftStaked: myTotalNftStaked,
+        nft: allNftStaked ?? [],
+      };
+      data['userInfo'] = userPoolInfo;
+    }
+
     return data;
   }
 

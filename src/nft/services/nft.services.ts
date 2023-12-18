@@ -135,6 +135,8 @@ export class NftService {
       stakedDays: nft.stakedDays,
       price: nft.price,
       metaData: metaData,
+      dailyInterestRate: metaData.dailyInterestRate,
+      roi: metaData.roi,
       chargeTime: nft.chargeTime,
       startTime: nft.startTime,
       createdAt: _get(nft, 'createdAt'),
@@ -152,6 +154,7 @@ export class NftService {
     const list = {};
     Object.keys(storeList).map((key) => {
       list[key] = storeList[key]?.map((item) => {
+        const metaData = this.getMetadata(item.level);
         return {
           name: item.name,
           description: item.description,
@@ -160,6 +163,8 @@ export class NftService {
           amount: item.amount,
           price: (item.amount * rate).toFixed(2),
           originalStakedDays: item.originalStakedDays,
+          dailyInterestRate: metaData.dailyInterestRate,
+          roi: metaData.roi,
           stakedDays: 0,
           remainStakedDays: item.originalStakedDays,
           status: NFT_STATUS.STORE,
@@ -210,6 +215,21 @@ export class NftService {
     result.docs = list;
     return { ...result, ...pagination };
   }
+
+  async getAllNftByUser(wallet: string, status: number, getAll = false) {
+    const conditions = { owner: wallet };
+    if (status && !getAll) {
+      conditions['status'] = status;
+    }
+    const nftList = await this.nftRepository.find({
+      conditions: conditions,
+    });
+    const list = nftList.map((item) => {
+      return this.populateNftInfo(item);
+    });
+
+    return list;
+  }
   /**
    *
    * @param paginationParam
@@ -249,23 +269,11 @@ export class NftService {
 
   public async stakingNft(actionDto: ActionDto, data = {}) {
     const stakingOwnerWallet = this.configService.get<string>('stakingOwnerWallet');
-    const { fromWallet, nft, action } = actionDto;
+    const { fromWallet, nft } = actionDto;
     let nftInfo = await this.getNftInfo(nft);
-    let isValidAction = false;
     console.log(`start staking. wallet : ${fromWallet}, nft: ${nft}`);
     //staking action
-    if (
-      action === NFT_ACTION.staking &&
-      nftInfo.status === NFT_STATUS.WALLET &&
-      nftInfo.owner === fromWallet
-    ) {
-      isValidAction = true;
-    }
-    if (!isValidAction) {
-      const { code, message, status } = Errors.INVALID_STAKING_OWNER_NFT;
-      throw new AppException(code, message, status);
-    }
-    if (nftInfo && isValidAction) {
+    if (nftInfo) {
       const conditions = { token: nft };
       const dataUpdate = {
         owner: stakingOwnerWallet,
@@ -281,25 +289,11 @@ export class NftService {
   }
 
   public async unStakingNft(actionDto: ActionDto, data = {}) {
-    const stakingOwnerWallet = this.configService.get<string>('stakingOwnerWallet');
-    const { fromWallet, nft, action } = actionDto;
+    const { fromWallet, nft } = actionDto;
     console.log(`start unstaking. wallet : ${fromWallet}, nft: ${nft}`);
     let nftInfo = await this.getNftInfo(nft);
-    let isValidAction = false;
     //unStaking action
-    if (
-      action === NFT_ACTION.unStaking &&
-      nftInfo.status === NFT_STATUS.STAKING &&
-      nftInfo.owner === stakingOwnerWallet &&
-      nftInfo.preOwner === fromWallet
-    ) {
-      isValidAction = true;
-    }
-    if (!isValidAction) {
-      const { code, message, status } = Errors.INVALID_STAKING_OWNER_NFT;
-      throw new AppException(code, message, status);
-    }
-    if (nftInfo && isValidAction) {
+    if (nftInfo) {
       const conditions = { token: nft };
       const dataUpdate = {
         owner: fromWallet,
