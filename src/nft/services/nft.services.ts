@@ -252,6 +252,7 @@ export class NftService {
     const { fromWallet, nft, action } = actionDto;
     let nftInfo = await this.getNftInfo(nft);
     let isValidAction = false;
+    console.log(`start staking. wallet : ${fromWallet}, nft: ${nft}`);
     //staking action
     if (
       action === NFT_ACTION.staking &&
@@ -274,6 +275,7 @@ export class NftService {
       };
       const options = { new: true };
       nftInfo = await this.nftRepository.findOneAndUpdate(conditions, dataUpdate, options);
+      console.log(`finish staking. wallet : ${fromWallet}, nft: ${nft}`);
       return this.populateNftInfo(nftInfo);
     }
   }
@@ -281,6 +283,7 @@ export class NftService {
   public async unStakingNft(actionDto: ActionDto, data = {}) {
     const stakingOwnerWallet = this.configService.get<string>('stakingOwnerWallet');
     const { fromWallet, nft, action } = actionDto;
+    console.log(`start unstaking. wallet : ${fromWallet}, nft: ${nft}`);
     let nftInfo = await this.getNftInfo(nft);
     let isValidAction = false;
     //unStaking action
@@ -313,6 +316,7 @@ export class NftService {
         maxCurrentStakingLevel === 0 ? 0 : this.helperService.getNftRankFromLevel(nftInfo.level);
       //cập nhập lại level cho user sau khi unstaking
       await this.userService.updateUserLevel(fromWallet, tokenLevel);
+      console.log(`finish unstaking. wallet : ${fromWallet}, nft: ${nft}`);
       return this.populateNftInfo(nftInfo);
     }
   }
@@ -466,9 +470,12 @@ export class NftService {
   public async cacheDelKey(key: string) {
     await this.cacheService.del(key);
   }
-  public async updateNftOwner(nft: string, owner: string, status: number, price?: number) {
+  public async updateNftOwner(nft: string, owner: string, status?: number, price?: number) {
     const conditions = { token: nft };
-    const dataUpdate = { owner: owner, status: status };
+    const dataUpdate = { owner: owner };
+    if (status) {
+      dataUpdate['status'] = status;
+    }
     if (price) {
       dataUpdate['price'] = price;
     }
