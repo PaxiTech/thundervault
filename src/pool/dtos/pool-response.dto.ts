@@ -45,19 +45,19 @@ export class PoolInfo {
   totalNftStaked: number;
 
   // @ApiProperty()
-  // totalSystemCommissionFee: number;
+  // totalSystemCommissionRoi: number;
 
   @ApiProperty()
-  currentTotalCommissionFeeSystem: number;
+  currentTotalCommissionRoiSystem: number;
 
   // @ApiProperty()
-  // remainCommissionFee: number;
+  // remainCommissionRoi: number;
 
   @ApiProperty()
-  myTotalNftStaked: number;
+  myTotalNftStaked?: number;
 
   @ApiProperty()
-  myCommissionFee: number;
+  myCommissionRoi?: number;
 }
 export class PoolInfoResponse {
   @ApiProperty()

@@ -31,7 +31,15 @@ export class UserController {
     const summary = await this.exchangeService.getSummaryByUser(wallet, {
       preRefCode: userInfo.myRefCode,
     });
-    return { ...userInfo, presale: { ...summary }, nft: myNft };
+    const allNftStaked = await this.nftService.getAllNftByUser(wallet, NFT_STATUS.STAKING);
+    const myCommissionRoi = await this.nftService.getCurrentTotalCommissionRoiByUser(wallet);
+    const myTotalNftStaked = await this.nftService.countNftStakedByUser(wallet);
+    const pool = {
+      nft: allNftStaked,
+      myCommissionRoi: myCommissionRoi,
+      myTotalNftStaked: myTotalNftStaked,
+    };
+    return { ...userInfo, presale: { ...summary }, nft: myNft, pool: pool };
   }
   @Post('nft')
   @ApiOkResponse({ type: NftListResponse })

@@ -21,6 +21,7 @@ import {
 import { COMMISSION_TYPE } from '@src/nft/schemas/commissionfee.schema';
 import { PoolInfo } from '../dtos/pool-response.dto';
 import { NftItem } from '@src/nft/dtos/nft-response.dto';
+import { NFT_STATUS } from '@src/nft/schemas/nft.schema';
 
 @Injectable()
 export class PoolService {
@@ -79,8 +80,8 @@ export class PoolService {
       const parentUserInfo = await this.userService.getUserInfoByMyRefCode(refCode);
       await this.userService.processMyRefCode(from, parentUserInfo.wallet);
     }
-    await this.processDirectCommissionFeeSystem(from, stakingData.nft, stakingData.price);
-    await this.processUserCommissionFee(stakingData, userInfo);
+    await this.processDirectCommissionRoiSystem(from, stakingData.nft, stakingData.price);
+    await this.processUserCommissionRoi(stakingData, userInfo);
     return poolInfo;
   }
 
@@ -89,7 +90,7 @@ export class PoolService {
    * @param stakingData
    * @param UserInfo
    */
-  public async processUserCommissionFee(stakingData: IPool, UserInfo: UserItem) {
+  public async processUserCommissionRoi(stakingData: IPool, UserInfo: UserItem) {
     const { from, nft, price } = stakingData;
     const {
       refLevel1,
@@ -102,16 +103,16 @@ export class PoolService {
       refLevel8,
     } = UserInfo;
     //condition referral direct
-    let nftCommissionFee = price * totalDirectFeeConfig;
+    let nftCommissionRoi = price * totalDirectFeeConfig;
 
-    const totalSystemCommissionFee = this.configService.get<number>('totalSystemCommissionFee');
+    const totalSystemCommissionRoi = this.configService.get<number>('totalSystemCommissionRoi');
     // lấy tổng số tiền đã trả cho staking
-    const currentTotalCommissionFeeSystem =
-      await this.nftService.getCurrentTotalCommissionFeeSystem();
+    const currentTotalCommissionRoiSystem =
+      await this.nftService.getCurrentTotalCommissionRoiSystem();
     // tính tổng số tiền còn lại của quỹ staking
-    const commissionFeeRemain = totalSystemCommissionFee - currentTotalCommissionFeeSystem;
-    nftCommissionFee =
-      commissionFeeRemain > nftCommissionFee ? nftCommissionFee : commissionFeeRemain;
+    const commissionFeeRemain = totalSystemCommissionRoi - currentTotalCommissionRoiSystem;
+    nftCommissionRoi =
+      commissionFeeRemain > nftCommissionRoi ? nftCommissionRoi : commissionFeeRemain;
     // xử lý ref level
     const allRefUserList = [
       refLevel1,
@@ -131,39 +132,39 @@ export class PoolService {
       const userRefId = allRefUserList[i]; //user id ứng với ref level
       const refLevel = i; //relevel
       const refConfigKey = `F${i}`; //key config
-      nftCommissionFee = await this.processDirectCommissionFeeByLevel({
+      nftCommissionRoi = await this.processDirectCommissionRoiByLevel({
         from: from,
         userWallet: userRefId,
         nft: nft,
         price: price,
-        nftCommissionFee: nftCommissionFee,
+        nftCommissionRoi: nftCommissionRoi,
         level: refLevel,
         configRelLevel: refConfigKey,
         type: COMMISSION_TYPE.DIRECT,
       });
     }
     // add rest direct commission fee to f0wallet
-    if (nftCommissionFee > 0) {
-      await this.processRestCommissionFeeSystem(
+    if (nftCommissionRoi > 0) {
+      await this.processRestCommissionRoiSystem(
         from,
         nft,
         price,
-        nftCommissionFee,
+        nftCommissionRoi,
         COMMISSION_TYPE.DIRECT,
       );
     }
     //cal staking commission fee
-    let nftStakingCommissionFee = price * totalStakingFeeConfig;
+    let nftStakingCommissionRoi = price * totalStakingFeeConfig;
     for (let i = 0; i < allRefUserList.length; i++) {
       const userRefId = allRefUserList[i]; //user id ứng với ref level
       const refLevel = i; //relevel
       const refConfigKey = `F${i}`; //key config
-      nftStakingCommissionFee = await this.processStakingCommissionFeeByLevel({
+      nftStakingCommissionRoi = await this.processStakingCommissionRoiByLevel({
         from: from,
         userWallet: userRefId,
         nft: nft,
         price: price,
-        nftCommissionFee: nftStakingCommissionFee,
+        nftCommissionRoi: nftStakingCommissionRoi,
         level: refLevel,
         configRelLevel: refConfigKey,
         type: COMMISSION_TYPE.STAKING,
@@ -171,12 +172,12 @@ export class PoolService {
     }
 
     //add rest staking commission fee to f0wallet
-    if (nftStakingCommissionFee > 0) {
-      await this.processRestCommissionFeeSystem(
+    if (nftStakingCommissionRoi > 0) {
+      await this.processRestCommissionRoiSystem(
         from,
         nft,
         price,
-        nftStakingCommissionFee,
+        nftStakingCommissionRoi,
         COMMISSION_TYPE.STAKING,
       );
     }
@@ -206,30 +207,30 @@ export class PoolService {
    * @param param
    * @returns
    */
-  public async processDirectCommissionFeeByLevel({
+  public async processDirectCommissionRoiByLevel({
     from,
     userWallet,
     nft,
     price,
-    nftCommissionFee,
+    nftCommissionRoi,
     level,
     configRelLevel,
     type,
   }) {
     //lấy thông tin F1
     const userInfo = await this.userService.getUserInfo(userWallet);
-    const maxValueCommissionFeeAvailable = await this.nftService.getAvailableCommissionFeeByUser(
+    const maxValueCommissionRoiAvailable = await this.nftService.getAvailableCommissionRoiByUser(
       userInfo.wallet,
     );
     // chỉ xử lý khi còn có thể nhận được commission fee
-    if (maxValueCommissionFeeAvailable > 0) {
+    if (maxValueCommissionRoiAvailable > 0) {
       // lấy giá trị config cho từng level ref.
       const directFeeConfigByLevel = directFeeConfig[configRelLevel][userInfo.level];
       // tính ra số tiền hoa hồng nhận được.
       let earningValue = this.helperService.calculateEarningValue(price, directFeeConfigByLevel);
-      nftCommissionFee = nftCommissionFee - earningValue;
+      nftCommissionRoi = nftCommissionRoi - earningValue;
       earningValue =
-        nftCommissionFee - earningValue > 0 ? earningValue : nftCommissionFee - earningValue;
+        nftCommissionRoi - earningValue > 0 ? earningValue : nftCommissionRoi - earningValue;
       const commissionFee = {
         from: from,
         owner: userInfo.wallet,
@@ -239,9 +240,9 @@ export class PoolService {
         refLevel: level,
         type: type,
       };
-      await this.nftService.createCommissionFee(commissionFee);
+      await this.nftService.createCommissionRoi(commissionFee);
     }
-    return nftCommissionFee;
+    return nftCommissionRoi;
   }
 
   /**
@@ -249,31 +250,31 @@ export class PoolService {
    * @param param
    * @returns
    */
-  public async processStakingCommissionFeeByLevel({
+  public async processStakingCommissionRoiByLevel({
     from,
     userWallet,
     nft,
     price,
-    nftCommissionFee,
+    nftCommissionRoi,
     level,
     configRelLevel,
     type,
   }) {
     //lấy thông tin F1
     const userInfo = await this.userService.getUserInfo(userWallet);
-    const maxValueCommissionFeeAvailable = await this.nftService.getAvailableCommissionFeeByUser(
+    const maxValueCommissionRoiAvailable = await this.nftService.getAvailableCommissionRoiByUser(
       userInfo.wallet,
     );
     // kiểm tra điều kiện có ít nhất 5 F1 staking và có 3 F1 hạng thấp hơn 1 bậc.
     const isValidStakingF1 = await this.validateStaking(userInfo.wallet, userInfo.level);
-    if (isValidStakingF1 && maxValueCommissionFeeAvailable > 0) {
+    if (isValidStakingF1 && maxValueCommissionRoiAvailable > 0) {
       // lấy giá trị config cho từng level ref.
       const stakingFeeConfigByLevel = stakingFeeConfig[configRelLevel][userInfo.level];
       // tính ra số tiền hoa hồng nhận được.
       let earningValue = this.helperService.calculateEarningValue(price, stakingFeeConfigByLevel);
-      nftCommissionFee = nftCommissionFee - earningValue;
+      nftCommissionRoi = nftCommissionRoi - earningValue;
       earningValue =
-        nftCommissionFee - earningValue > 0 ? earningValue : nftCommissionFee - earningValue;
+        nftCommissionRoi - earningValue > 0 ? earningValue : nftCommissionRoi - earningValue;
       const commissionFee = {
         from: from,
         owner: userInfo.wallet,
@@ -283,9 +284,9 @@ export class PoolService {
         refLevel: level,
         type: type,
       };
-      await this.nftService.createCommissionFee(commissionFee);
+      await this.nftService.createCommissionRoi(commissionFee);
     }
-    return nftCommissionFee;
+    return nftCommissionRoi;
   }
 
   /**
@@ -295,16 +296,16 @@ export class PoolService {
    * @param price
    * @returns
    */
-  public async processDirectCommissionFeeSystem(from: string, nft: string, price: number) {
+  public async processDirectCommissionRoiSystem(from: string, nft: string, price: number) {
     const commissionFee = price * totalDirectFeeConfig;
     const systemWallet = this.configService.get<string>('systemWallet');
     // lấy tổng số tiền quỹ cấu hình cho chức năng staking
-    const totalSystemCommissionFee = this.configService.get<number>('totalSystemCommissionFee');
+    const totalSystemCommissionRoi = this.configService.get<number>('totalSystemCommissionRoi');
     // lấy tổng số tiền đã trả cho staking
-    const currentTotalCommissionFeeSystem =
-      await this.nftService.getCurrentTotalCommissionFeeSystem();
+    const currentTotalCommissionRoiSystem =
+      await this.nftService.getCurrentTotalCommissionRoiSystem();
     // tính tổng số tiền còn lại của quỹ staking
-    const commissionFeeRemain = totalSystemCommissionFee - currentTotalCommissionFeeSystem;
+    const commissionFeeRemain = totalSystemCommissionRoi - currentTotalCommissionRoiSystem;
     // kiểm tra giá trị có thể nhận.
     const earningValue = commissionFeeRemain > commissionFee ? commissionFee : commissionFeeRemain;
     const commissionFeeData = {
@@ -317,8 +318,8 @@ export class PoolService {
       type: COMMISSION_TYPE.DIRECT, // nhận trực tiếp
     };
 
-    const directCommissionFee = await this.nftService.createCommissionFee(commissionFeeData);
-    return directCommissionFee;
+    const directCommissionRoi = await this.nftService.createCommissionRoi(commissionFeeData);
+    return directCommissionRoi;
   }
   /**
    * tính tổng số tiền còn dư nếu user không có ref
@@ -328,7 +329,7 @@ export class PoolService {
    * @param commissionFee
    * @returns
    */
-  public async processRestCommissionFeeSystem(
+  public async processRestCommissionRoiSystem(
     from: string,
     nft: string,
     price: number,
@@ -337,12 +338,12 @@ export class PoolService {
   ) {
     const f0Wallet = this.configService.get<string>('f0Wallet');
     // lấy tổng số tiền quỹ cấu hình cho chức năng staking
-    const totalSystemCommissionFee = this.configService.get<number>('totalSystemCommissionFee');
+    const totalSystemCommissionRoi = this.configService.get<number>('totalSystemCommissionRoi');
     // lấy tổng số tiền đã trả cho staking
-    const currentTotalCommissionFeeSystem =
-      await this.nftService.getCurrentTotalCommissionFeeSystem();
+    const currentTotalCommissionRoiSystem =
+      await this.nftService.getCurrentTotalCommissionRoiSystem();
     // tính tổng số tiền còn lại của quỹ staking
-    const commissionFeeRemain = totalSystemCommissionFee - currentTotalCommissionFeeSystem;
+    const commissionFeeRemain = totalSystemCommissionRoi - currentTotalCommissionRoiSystem;
     // kiểm tra giá trị có thể nhận.
     const earningValue = commissionFeeRemain > commissionFee ? commissionFee : commissionFeeRemain;
     const commissionFeeData = {
@@ -355,42 +356,59 @@ export class PoolService {
       type: type,
     };
 
-    const directCommissionFee = await this.nftService.createCommissionFee(commissionFeeData);
-    return directCommissionFee;
+    const directCommissionRoi = await this.nftService.createCommissionRoi(commissionFeeData);
+    return directCommissionRoi;
   }
 
   public async poolInfo(wallet: string) {
     // lấy tổng số tiền quỹ cấu hình cho chức năng staking
-    // const totalSystemCommissionFee = this.configService.get<number>('totalSystemCommissionFee');
+    // const totalSystemCommissionRoi = this.configService.get<number>('totalSystemCommissionRoi');
     // lấy tổng số tiền đã trả cho staking
-    const currentTotalCommissionFeeSystem =
-      await this.nftService.getCurrentTotalCommissionFeeSystem();
+    const currentTotalCommissionRoiSystem =
+      await this.nftService.getCurrentTotalCommissionRoiSystem();
+    const getTotalDailyCommissionRoi = await this.nftService.getTotalDailyCommissionRoi();
     // tính tổng số tiền còn lại của quỹ staking
-    // const remainCommissionFee = totalSystemCommissionFee - currentTotalCommissionFeeSystem;
-    const myCommissionFee = await this.nftService.getCurrentTotalCommissionFeeByUser(wallet);
+    // const remainCommissionRoi = totalSystemCommissionRoi - currentTotalCommissionRoiSystem;
     const totalNftStaked = await this.nftService.countAllNftStaked();
-    const myTotalNftStaked = await this.nftService.countNftStakedByUser(wallet);
-    const data: PoolInfo = {
-      // totalSystemCommissionFee: totalSystemCommissionFee,
-      currentTotalCommissionFeeSystem: currentTotalCommissionFeeSystem,
-      // remainCommissionFee: remainCommissionFee,
-      myCommissionFee: myCommissionFee,
+    const cache_key = 'totalDailyRoi';
+    const totalDailyRoi = await this.nftService.cacheGetKey(cache_key);
+    const data = {
+      // totalSystemCommissionRoi: totalSystemCommissionRoi,
+      // remainCommissionRoi: remainCommissionRoi,
+      currentTotalCommissionRoiSystem: currentTotalCommissionRoiSystem,
       totalNftStaked: totalNftStaked,
-      myTotalNftStaked: myTotalNftStaked,
+      totalCost: getTotalDailyCommissionRoi,
+      totalDailyRoi: totalDailyRoi ?? 0,
     };
+    if (wallet) {
+      const myCommissionRoi = await this.nftService.getCurrentTotalCommissionRoiByUser(wallet);
+      const myTotalNftStaked = await this.nftService.countNftStakedByUser(wallet);
+      const allNftStaked = await this.nftService.getAllNftByUser(wallet, NFT_STATUS.STAKING);
+      const userPoolInfo = {
+        myCommissionRoi: myCommissionRoi,
+        myTotalNftStaked: myTotalNftStaked,
+        nft: allNftStaked ?? [],
+      };
+      data['userInfo'] = userPoolInfo;
+    }
+
     return data;
   }
 
-  public async processCommissionFeeEveryDay() {
-    const listNftStaked = await this.getListNftCanReceiveCommissionFeeEveryDay();
+  public async processCommissionRoiEveryDay() {
+    const listNftStaked = await this.getListNftCanReceiveCommissionRoiEveryDay();
     if (_isEmpty(listNftStaked)) {
       return [];
     }
+    let totalDailyRoi = 0;
     listNftStaked.forEach(async (item) => {
-      await this.processCommissionFeeEveryDayByUser(item);
+      const userDailyRoi = await this.processCommissionRoiEveryDayByUser(item);
+      totalDailyRoi = totalDailyRoi + userDailyRoi;
     });
+    const cache_key = 'totalDailyRoi';
+    this.nftService.cacheSetKey(cache_key, totalDailyRoi);
   }
-  public async getListNftCanReceiveCommissionFeeEveryDay() {
+  public async getListNftCanReceiveCommissionRoiEveryDay() {
     const nfts = await this.nftService.getAllNftStaking();
     const currentTime = moment().startOf('day').toDate();
     // Lọc danh sách user dựa trên startTime
@@ -403,27 +421,28 @@ export class PoolService {
     return filterNftList;
   }
 
-  public async processCommissionFeeEveryDayByUser(nftInfo: NftItem) {
+  public async processCommissionRoiEveryDayByUser(nftInfo: NftItem) {
+    let earningValue = 0;
     if (!nftInfo.preOwner) {
       return;
     }
     const { token, price, preOwner, stakedDays } = nftInfo;
     //lấy thông tin F1
     const userInfo = await this.userService.getUserInfo(nftInfo.preOwner);
-    const maxValueCommissionFeeAvailable = await this.nftService.getAvailableCommissionFeeByUser(
+    const maxValueCommissionRoiAvailable = await this.nftService.getAvailableCommissionRoiByUser(
       userInfo.wallet,
     );
     // chỉ xử lý khi còn có thể nhận được commission fee
-    if (maxValueCommissionFeeAvailable > 0 && stakedDays > 1) {
+    if (maxValueCommissionRoiAvailable > 0 && stakedDays > 1) {
       // lấy giá trị config cho từng level ref.
 
       // tính ra số tiền hoa hồng nhận được.
       const staking_fee_per_day = stakingFeePerDay[userInfo.level];
-      let earningValue = this.helperService.calculateEarningValue(price, staking_fee_per_day);
+      earningValue = this.helperService.calculateEarningValue(price, staking_fee_per_day);
       earningValue =
-        maxValueCommissionFeeAvailable - earningValue > 0
+        maxValueCommissionRoiAvailable - earningValue > 0
           ? earningValue
-          : maxValueCommissionFeeAvailable - earningValue;
+          : maxValueCommissionRoiAvailable - earningValue;
       const commissionFee = {
         from: userInfo.wallet, //kiếm tiền từ chính nó.
         owner: userInfo.wallet,
@@ -433,7 +452,7 @@ export class PoolService {
         refLevel: 0, // nhận trực tiếp
         type: COMMISSION_TYPE.STAKING_DAY,
       };
-      await this.nftService.createCommissionFee(commissionFee);
+      await this.nftService.createCommissionRoi(commissionFee);
       // update nft info and nft pool info
       const currentTime = moment().startOf('day').toDate();
       const updateData = {
@@ -443,5 +462,6 @@ export class PoolService {
       };
       const nftInfo = await this.nftService.updateNft(token, preOwner, updateData);
     }
+    return earningValue;
   }
 }

@@ -12,7 +12,7 @@ import { StoreListDto } from '@src/store/dtos/list.dto';
 import * as fs from 'fs';
 import { get as _get, isNull as _isNull } from 'lodash';
 import { ActionDto } from '../dtos/action.dto';
-import { CommissionFeeRepository } from '../repositories/commissionfee.repository';
+import { CommissionRoiRepository } from '../repositories/commissionfee.repository';
 import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { UtilHelperService } from '@src/utils/helper.service';
@@ -22,7 +22,7 @@ import { UserService } from '@src/user/services/user.services';
 export class NftService {
   constructor(
     private nftRepository: NftRepository,
-    private commissionFeeRepository: CommissionFeeRepository,
+    private commissionFeeRepository: CommissionRoiRepository,
     private configService: ConfigService,
     private helperService: UtilHelperService,
     private userService: UserService,
@@ -135,6 +135,8 @@ export class NftService {
       stakedDays: nft.stakedDays,
       price: nft.price,
       metaData: metaData,
+      dailyInterestRate: metaData.dailyInterestRate,
+      roi: metaData.roi,
       chargeTime: nft.chargeTime,
       startTime: nft.startTime,
       createdAt: _get(nft, 'createdAt'),
@@ -152,6 +154,7 @@ export class NftService {
     const list = {};
     Object.keys(storeList).map((key) => {
       list[key] = storeList[key]?.map((item) => {
+        const metaData = this.getMetadata(item.level);
         return {
           name: item.name,
           description: item.description,
@@ -160,6 +163,8 @@ export class NftService {
           amount: item.amount,
           price: (item.amount * rate).toFixed(2),
           originalStakedDays: item.originalStakedDays,
+          dailyInterestRate: metaData.dailyInterestRate,
+          roi: metaData.roi,
           stakedDays: 0,
           remainStakedDays: item.originalStakedDays,
           status: NFT_STATUS.STORE,
@@ -210,6 +215,21 @@ export class NftService {
     result.docs = list;
     return { ...result, ...pagination };
   }
+
+  async getAllNftByUser(wallet: string, status: number, getAll = false) {
+    const conditions = { $or: [{ owner: wallet }, { preOwner: wallet }] };
+    if (status && !getAll) {
+      conditions['status'] = status;
+    }
+    const nftList = await this.nftRepository.find({
+      conditions: conditions,
+    });
+    const list = nftList.map((item) => {
+      return this.populateNftInfo(item);
+    });
+
+    return list;
+  }
   /**
    *
    * @param paginationParam
@@ -249,22 +269,11 @@ export class NftService {
 
   public async stakingNft(actionDto: ActionDto, data = {}) {
     const stakingOwnerWallet = this.configService.get<string>('stakingOwnerWallet');
-    const { fromWallet, nft, action } = actionDto;
+    const { fromWallet, nft } = actionDto;
     let nftInfo = await this.getNftInfo(nft);
-    let isValidAction = false;
+    console.log(`start staking. wallet : ${fromWallet}, nft: ${nft}`);
     //staking action
-    if (
-      action === NFT_ACTION.staking &&
-      nftInfo.status === NFT_STATUS.WALLET &&
-      nftInfo.owner === fromWallet
-    ) {
-      isValidAction = true;
-    }
-    if (!isValidAction) {
-      const { code, message, status } = Errors.INVALID_STAKING_OWNER_NFT;
-      throw new AppException(code, message, status);
-    }
-    if (nftInfo && isValidAction) {
+    if (nftInfo) {
       const conditions = { token: nft };
       const dataUpdate = {
         owner: stakingOwnerWallet,
@@ -274,29 +283,17 @@ export class NftService {
       };
       const options = { new: true };
       nftInfo = await this.nftRepository.findOneAndUpdate(conditions, dataUpdate, options);
+      console.log(`finish staking. wallet : ${fromWallet}, nft: ${nft}`);
       return this.populateNftInfo(nftInfo);
     }
   }
 
   public async unStakingNft(actionDto: ActionDto, data = {}) {
-    const stakingOwnerWallet = this.configService.get<string>('stakingOwnerWallet');
-    const { fromWallet, nft, action } = actionDto;
+    const { fromWallet, nft } = actionDto;
+    console.log(`start unstaking. wallet : ${fromWallet}, nft: ${nft}`);
     let nftInfo = await this.getNftInfo(nft);
-    let isValidAction = false;
     //unStaking action
-    if (
-      action === NFT_ACTION.unStaking &&
-      nftInfo.status === NFT_STATUS.STAKING &&
-      nftInfo.owner === stakingOwnerWallet &&
-      nftInfo.preOwner === fromWallet
-    ) {
-      isValidAction = true;
-    }
-    if (!isValidAction) {
-      const { code, message, status } = Errors.INVALID_STAKING_OWNER_NFT;
-      throw new AppException(code, message, status);
-    }
-    if (nftInfo && isValidAction) {
+    if (nftInfo) {
       const conditions = { token: nft };
       const dataUpdate = {
         owner: fromWallet,
@@ -313,6 +310,7 @@ export class NftService {
         maxCurrentStakingLevel === 0 ? 0 : this.helperService.getNftRankFromLevel(nftInfo.level);
       //cập nhập lại level cho user sau khi unstaking
       await this.userService.updateUserLevel(fromWallet, tokenLevel);
+      console.log(`finish unstaking. wallet : ${fromWallet}, nft: ${nft}`);
       return this.populateNftInfo(nftInfo);
     }
   }
@@ -397,7 +395,7 @@ export class NftService {
   }
 
   async getNftByUser(wallet: string) {
-    const conditions = { owner: wallet };
+    const conditions = { $or: [{ owner: wallet }, { preOwner: wallet }] };
     const nftList = await this.nftRepository.find({ conditions: conditions });
     const list = nftList.map((item) => {
       return this.populateNftInfo(item);
@@ -411,27 +409,31 @@ export class NftService {
     return totalAmount * 4; // 4 lần tổng giá trị staking
   }
 
-  public async getCurrentTotalCommissionFeeByUser(wallet: string) {
-    return await this.commissionFeeRepository.getTotalCommissionFeeStakingByUser(wallet);
+  public async getCurrentTotalCommissionRoiByUser(wallet: string) {
+    return await this.commissionFeeRepository.getTotalCommissionRoiStakingByUser(wallet);
   }
 
-  public async getCurrentTotalCommissionFeeSystem() {
-    return await this.commissionFeeRepository.getCurrentTotalCommissionFeeSystem();
+  public async getCurrentTotalCommissionRoiSystem() {
+    return await this.commissionFeeRepository.getCurrentTotalCommissionRoiSystem();
   }
 
-  public async getAvailableCommissionFeeByUser(wallet: string) {
-    const totalCommissionFee = await this.getCurrentTotalCommissionFeeByUser(wallet);
-    const maxCommissionFee = await this.getMaxValueStakingByUser(wallet);
-    return maxCommissionFee - totalCommissionFee;
+  public async getTotalDailyCommissionRoi() {
+    return await this.commissionFeeRepository.getTotalDailyCommissionRoi();
+  }
+
+  public async getAvailableCommissionRoiByUser(wallet: string) {
+    const totalCommissionRoi = await this.getCurrentTotalCommissionRoiByUser(wallet);
+    const maxCommissionRoi = await this.getMaxValueStakingByUser(wallet);
+    return maxCommissionRoi - totalCommissionRoi;
   }
 
   //history get commission fee
-  public async createCommissionFee(data) {
+  public async createCommissionRoi(data) {
     return await this.commissionFeeRepository.create(data);
   }
   public async getNftInfoToBuyNft(wallet: string, level: number, rate: number): Promise<any> {
     const metaData = this.getMetadata(level);
-    const cache_key = `${wallet}-${level}`;
+    const cache_key = `${wallet.toLowerCase()}-${level}`;
     const price = metaData.amount * rate;
     this.cacheSetKey(cache_key, price);
     const toWallet = this.configService.get<string>('nftOwnerWallet');
@@ -466,9 +468,12 @@ export class NftService {
   public async cacheDelKey(key: string) {
     await this.cacheService.del(key);
   }
-  public async updateNftOwner(nft: string, owner: string, status: number, price?: number) {
+  public async updateNftOwner(nft: string, owner: string, status?: number, price?: number) {
     const conditions = { token: nft };
-    const dataUpdate = { owner: owner, status: status };
+    const dataUpdate = { owner: owner };
+    if (status) {
+      dataUpdate['status'] = status;
+    }
     if (price) {
       dataUpdate['price'] = price;
     }

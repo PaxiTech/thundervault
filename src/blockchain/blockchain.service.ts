@@ -4,6 +4,7 @@ import { IExchange } from '@src/exchange/interfaces/exchange.interface';
 import { ExchangeService } from '@src/exchange/services/exchange.services';
 import { UserService } from '@src/user/services/user.services';
 import { NftService } from '@src/nft/services/nft.services';
+import { StoreService } from '@src/store/services/store.services';
 import { Contract, ethers, formatEther } from 'ethers';
 import * as moment from 'moment-timezone';
 import { NFT_ACTION, NFT_STATUS, STORE_OWNER } from '@src/nft/schemas/nft.schema';
@@ -35,6 +36,7 @@ export class BlockchainService {
     private userService: UserService,
     private nftService: NftService,
     private poolService: PoolService,
+    private storeService: StoreService,
   ) {
     this.ownerWallet = this.configService.get<string>('ownerWallet');
     this.ownerNftWallet = this.configService.get<string>('ownerNftWallet');
@@ -108,6 +110,7 @@ export class BlockchainService {
     // because Ankr provider limit call
     const contractBsc = new Contract(this.nftAddress, this.abiNft, this.providerBsc);
     contract.on('Transfer', (from, to: string, tokenId, event) => {
+      console.log(`Transfer. from : ${from} to : ${to} token : ${tokenId}`);
       // has minted
       if (
         to.toLowerCase() == this.ownerNftWallet.toLowerCase() &&
@@ -118,7 +121,8 @@ export class BlockchainService {
           .then((level) => {
             // TODO: save new nft
             // /nft/{level}/{tokenId}.json
-            this.nftService.generateNft(from, tokenId, level);
+            console.log(`blockchain minted. token : ${tokenId}  'level' ${level}`);
+            this.nftService.generateNft(to, tokenId, Number(level));
           });
       }
       // has burned
@@ -126,30 +130,46 @@ export class BlockchainService {
         // TODO: delete nft
         // xóa luôn json file không hay chỉ cần đưa về store?
         // tạm thời trả về store.
+        console.log(`blockchain burned. token : ${tokenId}`);
         this.nftService.updateNftOwner(tokenId, '0x0000000000000000000000000000000000000000', 0);
       }
 
       //TODO: update nft owner = to
       contractBsc
         .getFunction('getTokenLevel')(tokenId)
-        .then((level) => async () => {
-          //get cache price nft
-          const cache_key = `${from}-${level}`;
-          const price = await this.nftService.cacheGetKey(cache_key);
-          //kiểm tra xem user có tồn tại cache không.
-          if (price) {
-            //cập nhật owner, price, status
-            this.nftService.updateNftOwner(tokenId, from, NFT_STATUS.WALLET, price);
-            await this.nftService.cacheDelKey(cache_key);
+        .then(async (level) => {
+          if (to.toLowerCase() === STORE_OWNER) {
+            //buy nft from store
+            //get cache price nft
+            const cache_key = `${to.toLowerCase()}-${level}`;
+            console.log(`blockchain buy. token : ${tokenId}`);
+            console.log(`cache_key : ${cache_key}`);
+            const price = await this.nftService.cacheGetKey(cache_key);
+            //kiểm tra xem user có tồn tại cache không.
+            if (price) {
+              //cập nhật owner, price, status
+              this.nftService.updateNftOwner(tokenId, to, NFT_STATUS.WALLET, price);
+              await this.nftService.cacheDelKey(cache_key);
+              await this.storeService.createStoreHistory({
+                owner: to,
+                nft: tokenId,
+                price: price,
+                transactionHash: event.log.transactionHash,
+              });
+            }
+          } else {
+            //user transfer nft
+            this.nftService.updateNftOwner(tokenId, to);
           }
         });
     });
 
     contract.on('Staked', (tokenId, owner, event) => {
-      contract.getStakeInfo(tokenId).then((info) => async () => {
+      console.log(`start Staked . token : ${tokenId}  owner ${owner}`);
+      contract.getStakeInfo(tokenId).then(async (info) => {
         // const owner = info[0];
-        const startTime = info[1];
-        const stakedDays = info[2];
+        const startTime = info[1]; //bigint
+        const stakedDays = info[2]; // bigint
 
         //TODO: update nft staked
         const actionDto: ActionDto = {
@@ -173,11 +193,14 @@ export class BlockchainService {
           stakedDays: stakedDays,
           transactionHash: event.log.transactionHash,
         };
+        console.log(`processStaking token : ${tokenId} owner ${owner}`);
         this.poolService.processStaking(poolData);
+        console.log(`finish processStaking token : ${tokenId} owner ${owner}`);
       });
     });
-    contract.on('Unstaked', (tokenId, address, event) => {
-      contract.getStakeInfo(tokenId).then((info) => async () => {
+    contract.on('Unstaked', (tokenId, owner, event) => {
+      console.log(`start Unstaked token : ${tokenId}  owner ${owner}`);
+      contract.getStakeInfo(tokenId).then(async (info) => {
         const owner = info[0];
         const startTime = info[1];
         const stakedDays = info[2];
@@ -194,6 +217,7 @@ export class BlockchainService {
           stakedDays: stakedDays,
         };
         const nftInfo = await this.nftService.unStakingNft(actionDto, updateData);
+        console.log(`finish Unstaked token : ${tokenId}  owner ${owner}`);
       });
     });
   }

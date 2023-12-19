@@ -21,7 +21,7 @@ export class StoreController {
   @ApiOkResponse({ type: StoreListResponse })
   @ApiBadRequestResponse({ type: ErrorResponse })
   async getStoreList() {
-    //const rate = await this.blockchainService.getRateTokenUsdt();
+    // const rate = await this.blockchainService.getRateTokenUsdt();
     const rate = 1;
     const result = await this.nftService.getStoreList(rate);
     return result;
