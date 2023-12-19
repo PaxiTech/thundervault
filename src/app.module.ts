@@ -16,6 +16,7 @@ import { DebugModule } from './debug/debug.module';
 import { MarketModule } from './market/market.module';
 import { ScheduleModule } from './schedule/schedule.module';
 import { ScheduleModule as CoreScheduleModule } from '@nestjs/schedule';
+import { ConfigAppModule } from './config/config.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { ScheduleModule as CoreScheduleModule } from '@nestjs/schedule';
     MarketModule,
     ScheduleModule,
     CoreScheduleModule.forRoot(),
+    ConfigAppModule,
   ],
   controllers: [],
 })
