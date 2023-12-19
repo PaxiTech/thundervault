@@ -180,7 +180,7 @@ metaDataSimple[NFT_LEVEL.NFT_LEVEL_6] = [
     name: 'Marsian Cosmos Vault',
     description:
       "Behold the pinnacle of Thunder Vault's hierarchy - the Diamond Rank, an interstellar marvel named the Marsian Cosmos Vault. Crafted from otherworldly materials designed for space travel, this vault symbolizes a cosmic odyssey. Its environment showcases celestial crystals amidst space battleships and robots, underscoring a journey beyond Earth. The backdrop illustrates the Martian landscape with distant views of Saturn, evoking a sense of otherworldly beauty and the boundless expanse of the cosmos.",
-    image: 'https://thundervault.io/asset/nft/diamon-1-v1.png',
+    image: 'https://thundervault.io/asset/nft/diamond-1-v1.png',
     level: 16,
     amount: 47110,
     roi: 94220,
@@ -191,7 +191,7 @@ metaDataSimple[NFT_LEVEL.NFT_LEVEL_6] = [
     name: 'Celestial Conflict Vault',
     description:
       "Welcome to the pinnacle of Thunder Vault's hierarchy - the Diamond Rank, a testament to intergalactic warfare known as the Celestial Conflict Vault. Positioned amidst cosmic chaos, this vault is surrounded by an energy shield that safeguards its secrets. Witness space battleships engaged in fierce combat, vying for control over this coveted treasure trove. The victorious soul who claims ownership will emerge as the ultimate spacefarer, braving the celestial conflicts of the universe to safeguard their legacy.",
-    image: 'https://thundervault.io/asset/nft/diamon-2-v1.png',
+    image: 'https://thundervault.io/asset/nft/diamond-2-v1.png',
     level: 17,
     amount: 73457,
     roi: 146913,
@@ -202,7 +202,7 @@ metaDataSimple[NFT_LEVEL.NFT_LEVEL_6] = [
     name: 'Thunder Prime Vault',
     description:
       "Witness the epitome of Thunder Vault's essence – the Thunder Prime Vault, the pinnacle and the last chapter of the Thunder Vault saga. Originating from a distant, lost world in the universe, this vault possesses unparalleled, ancient technology veiled in secrecy. Protected by the formidable forces of thunder, it remains hidden, evading discovery by all but the most triumphant adventurers. Only those who triumphantly complete the adventure are deemed worthy of this legendary vault, signifying their exceptional journey through the realms of Thunder Vault.",
-    image: 'https://thundervault.io/asset/nft/diamon-3-v1.png',
+    image: 'https://thundervault.io/asset/nft/diamond-3-v1.png',
     level: 18,
     amount: 114538,
     roi: 229076,
