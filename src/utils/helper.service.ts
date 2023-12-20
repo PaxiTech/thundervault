@@ -12,4 +12,10 @@ export class UtilHelperService {
       ? moment(currentTime).format('YYYY-MM-DD HH:mm:ss')
       : moment().format('YYYY-MM-DD HH:mm:ss');
   }
+  public calculateEarningValue(price: number, currentBrokerageFeeStaking: any) {
+    return price * currentBrokerageFeeStaking;
+  }
+  public getNftRankFromLevel(level: number): number {
+    return Math.ceil(level / 3);
+  }
 }

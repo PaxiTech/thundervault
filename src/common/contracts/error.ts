@@ -80,4 +80,44 @@ export const Errors = {
     message: 'secret key is invalid',
     status: HttpStatus.BAD_REQUEST,
   },
+  NFT_NOT_EXIST: {
+    code: 'NFT_NOT_EXIST',
+    message: 'The nft does not exist.',
+    status: HttpStatus.NOT_FOUND,
+  },
+  REFERRAL_CODE_INVALID: {
+    code: 'REFERRAL_CODE_INVALID',
+    message: 'The ref code is invalid.',
+    status: HttpStatus.NOT_FOUND,
+  },
+  REFERRAL_CODE_INVALID_YOURSELF: {
+    code: 'REFERRAL_CODE_INVALID_YOURSELF',
+    message: 'Can not use your own ref code.',
+    status: HttpStatus.NOT_FOUND,
+  },
+  INVALID_BUY_NFT: {
+    code: 'INVALID_BUY_NFT',
+    message: 'Invalid buy nft',
+    status: HttpStatus.NOT_FOUND,
+  },
+  INVALID_STAKING_NFT: {
+    code: 'INVALID_STAKING_NFT',
+    message: 'Invalid staking nft',
+    status: HttpStatus.NOT_FOUND,
+  },
+  INVALID_STAKING_OWNER_NFT: {
+    code: 'INVALID_STAKING_OWNER_NFT',
+    message: 'Invalid owner nft',
+    status: HttpStatus.NOT_FOUND,
+  },
+  NFT_OUT_OF_STOCK: {
+    code: 'NFT_OUT_OF_STOCK',
+    message: 'The nft is out of stock.',
+    status: HttpStatus.NOT_FOUND,
+  },
+  META_NOT_EXIST: {
+    code: 'META_NOT_EXIST',
+    message: 'The nft does not support this level.',
+    status: HttpStatus.NOT_FOUND,
+  },
 };

@@ -7,6 +7,8 @@ import { UserRepository } from './repositories/user.repository';
 import { UserService } from './services/user.services';
 import { UserController } from './controllers/user/user.controller';
 import { JwtStrategy } from '@src/user/strategies/jwt.strategy';
+import { ExchangeModule } from '@src/exchange/exchange.module';
+import { NftModule } from '@src/nft/nft.module';
 
 @Global()
 @Module({
@@ -18,6 +20,8 @@ import { JwtStrategy } from '@src/user/strategies/jwt.strategy';
       inject: [ConfigService],
     }),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    ExchangeModule,
+    NftModule,
   ],
   providers: [UserRepository, UserService, JwtStrategy],
   exports: [UserRepository, UserService, JwtStrategy],

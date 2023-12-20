@@ -77,4 +77,13 @@ export class ExchangeController {
     const result = await this.exchangeService.getResult(exchangeResultDto, paginationParam);
     return result;
   }
+
+  // @Post('debug')
+  // @ApiOkResponse({ type: ExchangeItemResponse })
+  // @ApiBadRequestResponse({ type: ErrorResponse })
+  // async debug(@Body() exchangeAddManualDto: ExchangeAddManualDto) {
+  //   const { from, to, amount, transactionHash } = exchangeAddManualDto;
+  //   const result = await this.exchangeService.debugBlockChain(from, to, amount, transactionHash);
+  //   return result;
+  // }
 }

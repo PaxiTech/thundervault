@@ -9,6 +9,17 @@ export default () => ({
   presaleId: process.env.PRESALE_ID || 1,
   currentTime: process.env.CURRENT_TIME || '',
   ownerWallet: process.env.OWNER_WALLET || '',
+  nftOwnerWallet: process.env.NFTOWNERWALLET || '',
+  stakingOwnerWallet: process.env.STAKINGOWNERWALLET || '',
+  marketOwnerWallet: process.env.MARKETOWNERWALLET || '',
+  systemWallet: process.env.SYSTEMWALLET || '',
+  f0Wallet: process.env.F0WALLET || '',
+  totalSystemCommissionRoi: process.env.TOTALSYSTEMCOMMISSIONFEE || 0,
+  nftAddress: process.env.NFT_ADDRESS || '',
+  tdvAddress: process.env.TDV_ADDRESS || '',
+  ownerNftWallet: process.env.OWNERNFTWALLET || '',
   configSecretKey:
     process.env.SECRET_KEY || 'nJVvIsM2KJY4HRQVL1lwZ5gBHo3TAcz/GHOWJaN90HhOyN2a7rCPI9iJqyU=',
+  nft_resource: process.env.NFT_RESOURCE || './asset/resource/',
+  mainnet: process.env.MAINNET || false,
 });
