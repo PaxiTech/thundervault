@@ -27,9 +27,9 @@ export const presaleConfig = [
   {
     id: 'round-3',
     exchangeType: ExchangeType.PRIVATE_SALE,
-    startTime: '2023-11-15 00:00:00',
-    startSaleTime: '2023-11-16 14:00:00',
-    endTime: '2023-11-20 14:00:00',
+    startTime: '2024-01-01 00:00:00',
+    startSaleTime: '2024-01-02 14:00:00',
+    endTime: '2024-01-03 14:00:00',
     price: 0.15,
     ticketPrice: 1050,
     amountForOneTicket: 7000,
